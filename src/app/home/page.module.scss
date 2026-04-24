@@ -1,0 +1,76 @@
+.page {
+  min-height: 100vh;
+  padding: 24px;
+  background: #f3f6fb;
+}
+
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.hero {
+  border-radius: 20px;
+  border: 1px solid rgba(13, 71, 161, 0.18);
+  overflow: hidden;
+  background:
+    linear-gradient(120deg, rgba(13, 71, 161, 0.08), rgba(13, 71, 161, 0.02)),
+    url("https://images.unsplash.com/photo-1573496773905-f5b17e717f05?auto=format&fit=crop&w=1600&q=80")
+      center/cover;
+}
+
+.heroTitle {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0d2f6b;
+}
+
+.heroOverlay {
+  padding: 36px;
+  max-width: 760px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
+}
+
+.heroDescription {
+  max-width: 620px;
+}
+
+.sectionTitle {
+  margin-bottom: 14px;
+  font-weight: 700;
+  color: #0d2f6b;
+}
+
+.serviceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.serviceCard {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.tabsCard {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.newsSection {
+  border-radius: 16px;
+  padding: 22px;
+  background: #fff;
+}
+
+@media (max-width: 900px) {
+  .serviceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroOverlay {
+    padding: 24px;
+  }
+}

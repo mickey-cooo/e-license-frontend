@@ -1,0 +1,66 @@
+{
+  "Homepage": {
+    "signIn": {
+      "title": "Sign In"
+    },
+    "signUp": {
+      "title": "Sign Up"
+    },
+    "success": {
+      "login": "Login successfully"
+    },
+    "error": {
+      "somethingWentWrong": "Something went wrong. Please try again",
+      "CredentialsSignin": "Invalid email or password"
+    }
+  },
+  "MerchantForm": {
+    "register": "Register for Merchant",
+    "description": "Fill in the business information and contact information to start using the licensing system",
+    "merchantType": {
+      "food_and_beverage": "Food and Beverage",
+      "hotel_and_accommodation": "Hotel and Accommodation",
+      "tourism_and_travel": "Tourism and Travel",
+      "health_and_wellness": "Health and Wellness",
+      "education_and_training": "Education and Training",
+      "manufacturing": "Manufacturing",
+      "import_export": "Import and Export",
+      "transport_and_logistics": "Transport and Logistics",
+      "construction": "Construction",
+      "retail_and_ecommerce": "Retail and Ecommerce",
+      "environmental_service": "Environmental Service",
+      "digital_service": "Digital Service",
+      "other": "Other"
+    },
+    "merchantTypeDescription": {
+      "food_and_beverage": "Restaurants, cafes, street food, and beverage operators.",
+      "hotel_and_accommodation": "Hotels, hostels, serviced apartments, and short-stay operations.",
+      "tourism_and_travel": "Tour operators, travel agencies, guides, and tourism services.",
+      "health_and_wellness": "Clinics, spas, wellness centers, beauty services, and care services.",
+      "education_and_training": "Private schools, training centers, and tutoring businesses.",
+      "manufacturing": "Factories and production lines, including packaged consumer goods.",
+      "import_export": "Cross-border product trading, customs related, and bonded services.",
+      "transport_and_logistics": "Freight, warehousing, fleet operation, and logistics hubs.",
+      "construction": "Construction contractors, engineering works, and project management.",
+      "retail_and_ecommerce": "Retail shops, online marketplaces, and direct sellers.",
+      "environmental_service": "Waste handling, recycling, treatment, and environmental operations.",
+      "digital_service": "SaaS, digital platforms, software providers, and online service businesses.",
+      "other": "Uncategorized businesses requiring case-by-case analysis."
+    },
+    "businessActivity": {
+      "hotel": "Hotel",
+      "restaurant": "Restaurant",
+      "cafe": "Cafe",
+      "bar": "Bar",
+      "spa": "Spa",
+      "tour_operator": "Tour Operator",
+      "transport_service": "Transport Service",
+      "retail": "Retail",
+      "ecommerce": "Ecommerce",
+      "manufacturing": "Manufacturing",
+      "import_export": "Import and Export",
+      "education_center": "Education Center",
+      "other": "Other"
+    }
+  }
+}

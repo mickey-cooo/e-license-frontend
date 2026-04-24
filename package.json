@@ -1,0 +1,48 @@
+{
+  "name": "main-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@hookform/resolvers": "^5.2.2",
+    "@mui/icons-material": "^7.3.8",
+    "@mui/material": "^7.3.8",
+    "@mui/styled-engine-sc": "^7.3.7",
+    "@types/lodash": "^4.17.23",
+    "axios": "^1.13.5",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.3.1",
+    "dotenv-types": "^1.0.0",
+    "framer-motion": "^12.23.12",
+    "lodash": "^4.17.23",
+    "next": "16.1.6",
+    "next-auth": "^5.0.0-beta.30",
+    "next-intl": "^4.8.2",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-hook-form": "^7.71.1",
+    "react-toastify": "^11.0.5",
+    "sass": "^1.97.3",
+    "styled-components": "^6.3.9",
+    "swiper": "^12.1.2",
+    "zod": "3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Mitr, Sarabun } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ToastContainer } from "react-toastify";
 import { ThemeProvider } from "./components/providers/theme.provider";
 import { AuthSessionProvider } from "./components/providers/session.provider";
@@ -20,11 +20,10 @@ const mitr = Mitr({
   weight: ["400", "500", "600"],
 });
 
-export const metadata: Metadata = {
-  title: "e-Licensing | ระบบขอใบอนุญาตประกอบธุรกิจ",
-  description:
-    "ยื่นคำขอใบอนุญาตครั้งเดียว ส่งเอกสารครั้งเดียว และติดตามสถานะทุกหน่วยงานในที่เดียว",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Meta");
+  return { title: t("title"), description: t("description") };
+}
 
 export default async function RootLayout({
   children,

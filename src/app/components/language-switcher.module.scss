@@ -1,0 +1,36 @@
+.group {
+  display: inline-flex;
+  border: 1px solid var(--rule);
+}
+
+.option {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--graphite);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: background-color 160ms ease-out, color 160ms ease-out;
+
+  &:first-child {
+    border-right: 1px solid var(--rule);
+  }
+
+  &:hover {
+    background: var(--paper-sunk);
+  }
+
+  &:disabled {
+    cursor: progress;
+  }
+}
+
+.active,
+.active:hover {
+  background: var(--ink-blue);
+  color: var(--paper);
+}

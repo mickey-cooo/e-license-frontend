@@ -4,26 +4,29 @@ import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "./language-switcher";
 import { useRole } from "@/lib/helper/use-is-admin";
 import styles from "./top-navbar.module.scss";
 
 const navItems = [
-  { href: "/home", label: "หน้าแรก" },
-  { href: "/home/license", label: "แนะนำใบอนุญาต" },
-  { href: "/home/merchant", label: "สมัครผู้ประกอบการ" },
-  { href: "/home/document", label: "ส่งเอกสาร" },
-  { href: "/home/tracker", label: "ติดตามเอกสาร" },
-  { href: "/home/dashboard", label: "แดชบอร์ด" },
-  { href: "/home/profile", label: "โปรไฟล์" },
+  { href: "/home", label: "navHome" },
+  { href: "/home/license", label: "navLicense" },
+  { href: "/home/merchant", label: "navMerchant" },
+  { href: "/home/document", label: "navDocument" },
+  { href: "/home/tracker", label: "navTracker" },
+  { href: "/home/dashboard", label: "navDashboard" },
+  { href: "/home/profile", label: "navProfile" },
 ] as const;
 
 export function TopNavbar() {
   const pathname = usePathname();
+  const t = useTranslations("Common");
   const { isAdmin, authenticated, ready } = useRole();
 
   if (
     ["/login", "/register", "/forgot-password", "/reset-password"].includes(
-      pathname,
+      pathname
     )
   ) {
     return null;
@@ -32,7 +35,7 @@ export function TopNavbar() {
   const items = !authenticated
     ? []
     : isAdmin
-    ? [...navItems, { href: "/home/admin", label: "จัดการระบบ" }]
+    ? [...navItems, { href: "/home/admin", label: "navAdmin" as const }]
     : navItems;
 
   const handleLogout = async () => {
@@ -42,11 +45,14 @@ export function TopNavbar() {
   return (
     <header className={styles.bar}>
       <div className={styles.inner}>
-        <Link href="/home" className={styles.brand}>
-          <span className={styles.brandName}>e-Licensing</span>
-          <span className={styles.brandSub}>แบบคำขอใบอนุญาต</span>
-        </Link>
-        <nav aria-label="เมนูหลัก" className={styles.cells}>
+        <div className={styles.top}>
+          <Link href="/home" className={styles.brand}>
+            <span className={styles.brandName}>e-Licensing</span>
+            <span className={styles.brandSub}>{t("formTitle")}</span>
+          </Link>
+          <LanguageSwitcher />
+        </div>
+        <nav aria-label={t("mainMenu")} className={styles.cells}>
           {items.map((item) => {
             const active =
               item.href === "/home"
@@ -59,7 +65,7 @@ export function TopNavbar() {
                 aria-current={active ? "page" : undefined}
                 className={clsx(styles.cell, active && styles.active)}
               >
-                {item.label}
+                {t(item.label)}
               </Link>
             );
           })}
@@ -69,11 +75,11 @@ export function TopNavbar() {
               className={styles.cell}
               onClick={() => void handleLogout()}
             >
-              ออกจากระบบ
+              {t("logout")}
             </button>
           ) : ready ? (
             <Link href="/login" className={styles.cell}>
-              เข้าสู่ระบบ
+              {t("login")}
             </Link>
           ) : null}
         </nav>

@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const loginSchema = z.object({
-  email: z.string().email("กรุณากรอกอีเมลให้ถูกต้อง"),
+  email: z.string().email("emailInvalid"),
   password: z
     .string()
-    .min(3, "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร")
-    .max(100, "รหัสผ่านยาวเกินไป"),
+    .min(3, "passwordRequired")
+    .max(100, "passwordMax"),
 });
 
 export type LoginSchema = z.infer<typeof loginSchema>;

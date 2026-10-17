@@ -2,19 +2,19 @@ import { z } from "zod";
 
 export const registerSchema = z
   .object({
-    email: z.string().email("กรุณากรอกอีเมลให้ถูกต้อง"),
+    email: z.string().email("emailInvalid"),
     password: z
       .string()
-      .min(8, "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร")
-      .max(100, "รหัสผ่านยาวเกินไป"),
+      .min(8, "passwordMin")
+      .max(100, "passwordMax"),
     confirmPassword: z
       .string()
-      .min(8, "ยืนยันรหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร")
-      .max(100, "ยืนยันรหัสผ่านยาวเกินไป"),
+      .min(8, "confirmMin")
+      .max(100, "confirmMax"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
-    message: "รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน",
+    message: "passwordMismatch",
   });
 
 export type RegisterSchema = z.infer<typeof registerSchema>;

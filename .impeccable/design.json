@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-17T00:00:00Z",
+  "title": "Design System: e-Licensing",
+  "extensions": {
+    "colorMeta": {
+      "desk": {"role":"neutral","displayName":"Desk Grey","canonical":"#d4d5d7","tonalRamp":["#2a2d34","#464a52","#62666d","#7f8288","#9c9ea3","#b8babd","#d4d5d7","#eeeeef"]},
+      "paper": {"role":"neutral","displayName":"Form Paper","canonical":"#fbfbf8","tonalRamp":["#2a2d34","#4a4f5a","#8a8d85","#b9bdc6","#d4d5d7","#f0f1ee","#f7f7f4","#fbfbf8"]},
+      "paper-sunk": {"role":"neutral","displayName":"Sunk Paper","canonical":"#f0f1ee","tonalRamp":["#2a2d34","#4a4f5a","#8a8d85","#b9bdc6","#d4d5d7","#e3e5e9","#eceeea","#f0f1ee"]},
+      "graphite": {"role":"neutral","displayName":"Graphite","canonical":"#2a2d34","tonalRamp":["#2a2d34","#4a4f5a","#5b606b","#7a7f8a","#9aa0aa","#b9bdc6","#d4d5d7","#ecedef"]},
+      "graphite-soft": {"role":"neutral","displayName":"Soft Graphite","canonical":"#4a4f5a","tonalRamp":["#2a2d34","#3a3e47","#4a4f5a","#5b606b","#7a7f8a","#9aa0aa","#b9bdc6","#d4d5d7"]},
+      "rule-soft": {"role":"neutral","displayName":"Pale Rule","canonical":"#b9bdc6","tonalRamp":["#2a2d34","#4a4f5a","#6b707b","#8a909b","#b9bdc6","#cdd0d6","#e3e5e9","#f0f1f3"]},
+      "ink-blue": {"role":"primary","displayName":"Ballpoint Ink Blue","canonical":"#1f3b8c","tonalRamp":["#0f1d46","#172c69","#1f3b8c","#3d5bb5","#6580cb","#8fa3da","#bcc8ea","#e4e9f6"]},
+      "ink-blue-deep": {"role":"primary","displayName":"Deep Ink Blue","canonical":"#172c69","tonalRamp":["#0a1330","#0f1d46","#172c69","#1f3b8c","#3d5bb5","#6580cb","#8fa3da","#bcc8ea"]},
+      "stamp-red": {"role":"secondary","displayName":"Rubber-Stamp Red","canonical":"#b7222a","tonalRamp":["#4a0e12","#7a171c","#b7222a","#cc4a51","#dc7378","#e8a0a3","#f2c8ca","#fae8e9"]}
+    },
+    "typographyMeta": {
+      "display": {"displayName":"Display","purpose":"Page title (h1), Mitr, ink-blue."},
+      "headline": {"displayName":"Headline","purpose":"Section headings h2-h6, Mitr."},
+      "title": {"displayName":"Title","purpose":"Panel titles, chips, stamp lettering."},
+      "body": {"displayName":"Body","purpose":"Sarabun printed form text, tabular numerals."},
+      "label": {"displayName":"Label","purpose":"Captions and helper text."}
+    },
+    "shadows": [
+      {"name":"sheet-lift","value":"0 1px 0 #b9bdc6, 0 14px 28px -18px rgba(42,45,52,0.45)","purpose":"Sheets and stamp-slot panel resting on the desk."}
+    ],
+    "motion": [
+      {"name":"ease-ui","value":"160ms ease-out","purpose":"Nav cell and step link hover."},
+      {"name":"stamp-thunk","value":"420ms cubic-bezier(0.16, 1, 0.3, 1)","purpose":"Stamp entrance on load; disabled under reduced motion."}
+    ],
+    "breakpoints": [
+      {"name":"stack","value":"900px"},
+      {"name":"nav-compact","value":"720px"},
+      {"name":"step-stack","value":"560px"}
+    ]
+  },
+  "components": [
+    {
+      "name":"Primary Button","kind":"button","refersTo":"button-primary",
+      "description":"Start or submit; ink-blue fill.",
+      "html":"<button class=\"ds-btn-primary\">เริ่มลงทะเบียนคำขอ</button>",
+      "css":".ds-btn-primary{background:#1f3b8c;color:#fbfbf8;border:0;border-radius:2px;min-height:44px;padding:9px 20px;font:700 1rem Sarabun,sans-serif;cursor:pointer;transition:background-color 160ms ease-out}.ds-btn-primary:hover{background:#172c69}.ds-btn-primary:focus-visible{outline:2px solid #1f3b8c;outline-offset:2px}"
+    },
+    {
+      "name":"Outline Button","kind":"button","refersTo":"button-outline",
+      "description":"Secondary action; 1px graphite border.",
+      "html":"<button class=\"ds-btn-outline\">ดูคู่มือใบอนุญาต</button>",
+      "css":".ds-btn-outline{background:transparent;color:#2a2d34;border:1px solid #2a2d34;border-radius:2px;min-height:44px;padding:9px 20px;font:700 1rem Sarabun,sans-serif;cursor:pointer;transition:background-color 160ms ease-out}.ds-btn-outline:hover{background:#f0f1ee}.ds-btn-outline:focus-visible{outline:2px solid #1f3b8c;outline-offset:2px}"
+    },
+    {
+      "name":"Text Field","kind":"input","refersTo":"input",
+      "description":"Paper fill, graphite rule, blue entered text.",
+      "html":"<input class=\"ds-input\" placeholder=\"ชื่อธุรกิจ\">",
+      "css":".ds-input{box-sizing:border-box;min-height:48px;width:240px;padding:12px 14px;background:#fbfbf8;color:#1f3b8c;border:1px solid #2a2d34;border-radius:2px;font:1rem Sarabun,sans-serif}.ds-input::placeholder{color:#5b606b}.ds-input:focus-visible{outline:0;border:2px solid #1f3b8c}"
+    },
+    {
+      "name":"Nav Cells","kind":"nav","refersTo":"nav-cell",
+      "description":"Boxed cells in one ruled strip; active cell inverts to blue.",
+      "html":"<nav class=\"ds-cells\"><a class=\"ds-cell ds-active\" href=\"#\">หน้าแรก</a><a class=\"ds-cell\" href=\"#\">ใบอนุญาต</a><a class=\"ds-cell\" href=\"#\">ติดตาม</a></nav>",
+      "css":".ds-cells{display:inline-flex;border:1px solid #2a2d34;background:#fbfbf8}.ds-cell{display:flex;align-items:center;min-height:44px;padding:6px 16px;font:500 .9375rem Sarabun,sans-serif;color:#2a2d34;text-decoration:none;border-right:1px solid #2a2d34;transition:background-color 160ms ease-out}.ds-cell:last-child{border-right:0}.ds-cell:hover{background:#f0f1ee}.ds-active,.ds-active:hover{background:#1f3b8c;color:#fbfbf8}.ds-cell:focus-visible{outline:2px solid #1f3b8c;outline-offset:2px}"
+    },
+    {
+      "name":"Status Chip","kind":"chip","refersTo":"chip",
+      "description":"Transparent fill, outlined; blue success, red error, dashed warning.",
+      "html":"<span class=\"ds-chip\">อนุมัติแล้ว</span> <span class=\"ds-chip ds-warn\">รอตรวจ</span>",
+      "css":".ds-chip{display:inline-block;padding:2px 12px;font:500 .875rem Mitr,sans-serif;color:#1f3b8c;border:1px solid #1f3b8c;border-radius:2px}.ds-warn{color:#2a2d34;border-color:#2a2d34;border-style:dashed}"
+    },
+    {
+      "name":"Form Sheet with Step Row","kind":"card","refersTo":"sheet",
+      "description":"Paper sheet lifted off the desk; steps as ruled rows.",
+      "html":"<div class=\"ds-sheet\"><div class=\"ds-step\"><span class=\"ds-no\">1</span><span class=\"ds-txt\">ลงทะเบียนผู้ประกอบการ</span></div></div>",
+      "css":".ds-sheet{background:#fbfbf8;border:1px solid #2a2d34;box-shadow:0 1px 0 #b9bdc6,0 14px 28px -18px rgba(42,45,52,.45);width:320px;color:#2a2d34;font-family:Sarabun,sans-serif}.ds-step{display:grid;grid-template-columns:56px 1fr;align-items:center}.ds-no{display:grid;place-items:center;align-self:stretch;font:1.25rem Mitr,sans-serif;color:#b7222a;border-right:1px solid #2a2d34}.ds-txt{padding:16px 20px;font-weight:700}"
+    },
+    {
+      "name":"Stamp","kind":"custom","refersTo":"stamp",
+      "description":"Rotated double-bordered mark; ink grain filter omitted in snippet.",
+      "html":"<span class=\"ds-stamp\">ตัวอย่าง</span>",
+      "css":".ds-stamp{display:inline-block;padding:4px 14px;font:500 1.125rem/1.5 Mitr,sans-serif;color:#b7222a;border:2px solid #b7222a;outline:1px solid #b7222a;outline-offset:2px;border-radius:3px;transform:rotate(-4deg);mix-blend-mode:multiply}"
+    }
+  ],
+  "narrative": {
+    "northStar":"The Rubber-Stamp Form",
+    "overview":"The app is a paper application form that agencies stamp. A grey desk holds near-white sheets ruled in 1px graphite boxes with square corners. Filled values and the primary action are ballpoint blue; serials, step numbers and corrections are rubber-stamp red. Stamps are the one theatrical device: rotated slightly, double-bordered, pressed in with a short thunk.",
+    "keyCharacteristics":["Flat ruled boxes, 1px graphite, near-square corners (2px)","Three inks only: graphite, ink-blue, stamp-red","Mitr for headings and stamp lettering, Sarabun for printed form text","Stamps are rotated, double-bordered, ink-textured, multiply-blended","Sample content is labeled as sample; no invented agencies"],
+    "rules":[
+      {"name":"The Two Inks Rule","body":"Blue means the user's own action or data; red means the system's mark or a problem. A third accent hue does not exist.","section":"colors"},
+      {"name":"The Ruled Not Tinted Rule","body":"Structure comes from graphite 1px lines, not from colored fills or tinted panels.","section":"colors"},
+      {"name":"The Thai Line-Height Rule","body":"Never set Thai text below 1.4 line-height; body sits at 1.65 to 1.7.","section":"typography"},
+      {"name":"The Paper On Desk Rule","body":"One soft lift for sheets; every other element is flat with a 1px rule.","section":"elevation"}
+    ],
+    "dos":["Do build every surface from sheets on the desk and ruled 1px graphite cells.","Do reserve ink-blue for user action and data, and stamp-red for system marks and errors.","Do label stamp examples as samples.","Do keep 44px minimum targets and the 2px focus outline in ink-blue."],
+    "donts":["Don't use a hero photo, a service-card grid or a generic blue portal look.","Don't round corners beyond 2px (3px on stamps only) or use pill shapes.","Don't add shadows beyond the sheet lift.","Don't stamp-effect everything; stamps are marks of agency action, not decoration."]
+  }
+}

@@ -6,15 +6,13 @@ import {
   Box,
   Button,
   Chip,
-  FormControlLabel,
   Grid,
   MenuItem,
   Stack,
-  Switch,
   TextField,
 } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
 import {
   merchantSchema,
@@ -29,6 +27,8 @@ import {
 } from "@/service/merchant.service";
 import type { LicenseRecommendation } from "@/service/license-advisory.service";
 import { LicenseRecommendations } from "./license-recommendations";
+import { ConditionChecklist } from "./condition-checklist";
+import { fieldError } from "@/lib/helper/field-error";
 
 const businessActivityOptions = [
   { value: "hotel", labelKey: "businessActivity.hotel" },
@@ -37,7 +37,10 @@ const businessActivityOptions = [
   { value: "bar", labelKey: "businessActivity.bar" },
   { value: "spa", labelKey: "businessActivity.spa" },
   { value: "tour_operator", labelKey: "businessActivity.tour_operator" },
-  { value: "transport_service", labelKey: "businessActivity.transport_service" },
+  {
+    value: "transport_service",
+    labelKey: "businessActivity.transport_service",
+  },
   { value: "retail", labelKey: "businessActivity.retail" },
   { value: "ecommerce", labelKey: "businessActivity.ecommerce" },
   { value: "manufacturing", labelKey: "businessActivity.manufacturing" },
@@ -45,14 +48,29 @@ const businessActivityOptions = [
   { value: "education_center", labelKey: "businessActivity.education_center" },
 ];
 
+const conditionNames = [
+  "handlesHazardousMaterial",
+  "hasAlcoholService",
+  "hasFoodPreparation",
+] as const;
+
+const conditionFields = {
+  hazardous: "handlesHazardousMaterial",
+  alcohol: "hasAlcoholService",
+  food: "hasFoodPreparation",
+} as const;
+
 export function MerchantForm({ onCreated }: { onCreated?: () => void }) {
   const t = useTranslations("MerchantForm");
+  const m = useTranslations("Merchant");
+  const v = useTranslations("Validation");
   const [preview, setPreview] = useState<LicenseRecommendation[] | null>(null);
   const [previewing, setPreviewing] = useState(false);
   const {
     control,
     register,
     getValues,
+    setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<MerchantFormValues, undefined, MerchantSchema>({
@@ -73,6 +91,18 @@ export function MerchantForm({ onCreated }: { onCreated?: () => void }) {
     },
   });
 
+  const conditions = useWatch({
+    control,
+    name: [
+      "handlesHazardousMaterial",
+      "hasAlcoholService",
+      "hasFoodPreparation",
+    ],
+  }).reduce(
+    (acc, value, index) => ({ ...acc, [conditionNames[index]]: value }),
+    {} as Record<(typeof conditionNames)[number], boolean | undefined>
+  );
+
   const onSubmit = async (values: MerchantSchema) => {
     const payload = {
       ...values,
@@ -81,20 +111,20 @@ export function MerchantForm({ onCreated }: { onCreated?: () => void }) {
 
     const result = await createMerchant(payload);
     if (result.success) {
-      toast.success("สมัคร Merchant สำเร็จ");
+      toast.success(m("registerSuccess"));
       setPreview(
-        result.data?.data?.licenseAnalysis?.recommendedLicenses ?? null,
+        result.data?.data?.licenseAnalysis?.recommendedLicenses ?? null
       );
       onCreated?.();
       return;
     }
-    toast.error(result.message ?? "ไม่สามารถสมัคร Merchant ได้");
+    toast.error(result.message ?? m("registerFailed"));
   };
 
   const onPreview = async () => {
     const values = getValues();
     if (!values.merchantType) {
-      toast.error("กรุณาเลือกประเภทธุรกิจก่อน");
+      toast.error(m("pickTypeFirst"));
       return;
     }
     setPreviewing(true);
@@ -112,7 +142,7 @@ export function MerchantForm({ onCreated }: { onCreated?: () => void }) {
     }
     setPreview(
       (result.data as { recommendedLicenses?: LicenseRecommendation[] })
-        ?.recommendedLicenses ?? [],
+        ?.recommendedLicenses ?? []
     );
   };
 
@@ -121,50 +151,50 @@ export function MerchantForm({ onCreated }: { onCreated?: () => void }) {
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            label="ชื่อกิจการ"
+            label={m("name")}
             size="small"
             margin="dense"
             fullWidth
             sx={{ "& .MuiInputBase-root": { fontSize: 14 } }}
             error={Boolean(errors.merchantName)}
-            helperText={errors.merchantName?.message}
+            helperText={fieldError(v, errors.merchantName)}
             {...register("merchantName")}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            label="เลขทะเบียนพาณิชย์"
+            label={m("registrationNumber")}
             size="small"
             margin="dense"
             fullWidth
             sx={{ "& .MuiInputBase-root": { fontSize: 14 } }}
             error={Boolean(errors.businessRegistrationNumber)}
-            helperText={errors.businessRegistrationNumber?.message}
+            helperText={fieldError(v, errors.businessRegistrationNumber)}
             {...register("businessRegistrationNumber")}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            label="เลขผู้เสียภาษี 13 หลัก"
+            label={m("taxId")}
             size="small"
             margin="dense"
             fullWidth
             sx={{ "& .MuiInputBase-root": { fontSize: 14 } }}
             error={Boolean(errors.taxId)}
-            helperText={errors.taxId?.message}
+            helperText={fieldError(v, errors.taxId)}
             {...register("taxId")}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            label="ประเภทธุรกิจ"
+            label={m("businessType")}
             select
             size="small"
             margin="dense"
             fullWidth
             sx={{ "& .MuiInputBase-root": { fontSize: 14 } }}
             error={Boolean(errors.merchantType)}
-            helperText={errors.merchantType?.message}
+            helperText={fieldError(v, errors.merchantType)}
             {...register("merchantType")}
           >
             {merchantTypeOptions.map((option) => (
@@ -176,37 +206,37 @@ export function MerchantForm({ onCreated }: { onCreated?: () => void }) {
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            label="ชื่อผู้ติดต่อ"
+            label={m("contactName")}
             size="small"
             margin="dense"
             fullWidth
             sx={{ "& .MuiInputBase-root": { fontSize: 14 } }}
             error={Boolean(errors.contactName)}
-            helperText={errors.contactName?.message}
+            helperText={fieldError(v, errors.contactName)}
             {...register("contactName")}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            label="อีเมลผู้ติดต่อ"
+            label={m("contactEmail")}
             size="small"
             margin="dense"
             fullWidth
             sx={{ "& .MuiInputBase-root": { fontSize: 14 } }}
             error={Boolean(errors.contactEmail)}
-            helperText={errors.contactEmail?.message}
+            helperText={fieldError(v, errors.contactEmail)}
             {...register("contactEmail")}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            label="เบอร์โทรผู้ติดต่อ"
+            label={m("contactPhone")}
             size="small"
             margin="dense"
             fullWidth
             sx={{ "& .MuiInputBase-root": { fontSize: 14 } }}
             error={Boolean(errors.contactPhoneNumber)}
-            helperText={errors.contactPhoneNumber?.message}
+            helperText={fieldError(v, errors.contactPhoneNumber)}
             {...register("contactPhoneNumber")}
           />
         </Grid>
@@ -228,26 +258,25 @@ export function MerchantForm({ onCreated }: { onCreated?: () => void }) {
                       {...getTagProps({ index })}
                       key={option}
                       size="small"
-                      label={
-                        t(
-                          businessActivityOptions.find((item) => item.value === option)
-                            ?.labelKey ?? "businessActivity.other",
-                        )
-                      }
+                      label={t(
+                        businessActivityOptions.find(
+                          (item) => item.value === option
+                        )?.labelKey ?? "businessActivity.other"
+                      )}
                     />
                   ))
                 }
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="ประเภทธุรกิจ"
+                    label={m("businessSubtype")}
                     size="small"
                     margin="dense"
-                    placeholder="เลือกประเภทธุรกิจย่อย"
+                    placeholder={m("subtypePlaceholder")}
                     error={Boolean(errors.businessActivities)}
                     helperText={
-                      errors.businessActivities?.message ??
-                      "สามารถเลือกได้มากกว่า 1 รายการ"
+                      fieldError(v, errors.businessActivities) ??
+                      m("subtypeHelper")
                     }
                   />
                 )}
@@ -257,7 +286,7 @@ export function MerchantForm({ onCreated }: { onCreated?: () => void }) {
         </Grid>
         <Grid size={12}>
           <TextField
-            label="ที่อยู่กิจการ (ถ้ามี)"
+            label={m("addressOptional")}
             size="small"
             margin="dense"
             fullWidth
@@ -265,70 +294,35 @@ export function MerchantForm({ onCreated }: { onCreated?: () => void }) {
             multiline
             minRows={2}
             error={Boolean(errors.businessAddress)}
-            helperText={errors.businessAddress?.message}
+            helperText={fieldError(v, errors.businessAddress)}
             {...register("businessAddress")}
           />
         </Grid>
       </Grid>
 
-      <Stack direction={{ xs: "column", md: "row" }} spacing={1} sx={{ mt: 2 }}>
-        <Controller
-          control={control}
-          name="handlesHazardousMaterial"
-          render={({ field }) => (
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={Boolean(field.value)}
-                  onChange={(_, checked) => field.onChange(checked)}
-                />
-              }
-              label="มีวัตถุอันตราย"
-            />
-          )}
+      <Box sx={{ mt: 3 }}>
+        <ConditionChecklist
+          values={{
+            hazardous: Boolean(conditions.handlesHazardousMaterial),
+            alcohol: Boolean(conditions.hasAlcoholService),
+            food: Boolean(conditions.hasFoodPreparation),
+          }}
+          onChange={(key, checked) =>
+            setValue(conditionFields[key], checked, { shouldDirty: true })
+          }
         />
-        <Controller
-          control={control}
-          name="hasAlcoholService"
-          render={({ field }) => (
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={Boolean(field.value)}
-                  onChange={(_, checked) => field.onChange(checked)}
-                />
-              }
-              label="มีบริการเครื่องดื่มแอลกอฮอล์"
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="hasFoodPreparation"
-          render={({ field }) => (
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={Boolean(field.value)}
-                  onChange={(_, checked) => field.onChange(checked)}
-                />
-              }
-              label="มีการเตรียมอาหาร"
-            />
-          )}
-        />
-      </Stack>
+      </Box>
 
       <Stack direction="row" spacing={1.5} sx={{ mt: 2.5 }}>
         <Button type="submit" variant="contained" disabled={isSubmitting}>
-          {isSubmitting ? "กำลังส่งข้อมูล..." : "สมัครเป็น Merchant"}
+          {isSubmitting ? m("submitting") : m("submit")}
         </Button>
         <Button
           variant="outlined"
           onClick={() => void onPreview()}
           disabled={previewing}
         >
-          {previewing ? "กำลังตรวจสอบ..." : "ตรวจสอบใบอนุญาตที่ต้องใช้"}
+          {previewing ? m("checking") : m("checkLicenses")}
         </Button>
       </Stack>
       {preview ? (

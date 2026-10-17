@@ -1,0 +1,59 @@
+.group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+  font-family: var(--font-stamp);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  color: var(--graphite);
+}
+
+.help {
+  margin: 4px 0 12px;
+  font-size: 0.9375rem;
+  color: var(--graphite-soft);
+}
+
+.rows {
+  display: grid;
+  border: 1px solid var(--rule);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 16px 10px 8px;
+  cursor: pointer;
+  background: var(--paper);
+  transition: background-color 160ms ease-out;
+
+  & + & {
+    border-top: 1px solid var(--rule);
+  }
+
+  &:hover {
+    background: var(--paper-sunk);
+  }
+}
+
+.checked {
+  background: var(--paper-sunk);
+}
+
+.label {
+  display: block;
+  font-weight: 700;
+  color: var(--graphite);
+}
+
+.hint {
+  display: block;
+  font-size: 0.9375rem;
+  color: var(--graphite-soft);
+}

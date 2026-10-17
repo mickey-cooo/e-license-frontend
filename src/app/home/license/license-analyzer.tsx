@@ -5,13 +5,12 @@ import {
   Autocomplete,
   Box,
   Button,
-  FormControlLabel,
   MenuItem,
   Stack,
-  Switch,
   TextField,
   Typography,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import {
   analyzeLicenses,
@@ -20,14 +19,36 @@ import {
   type MerchantTypeInfo,
 } from "@/service/license-advisory.service";
 import { LicenseRecommendations } from "../license-recommendations";
+import { ConditionChecklist } from "../condition-checklist";
 
 const activitySuggestions = [
-  "hotel", "restaurant", "cafe", "bar", "spa", "tour_operator",
-  "transport_service", "retail", "ecommerce", "manufacturing",
-  "import_export", "education_center",
+  "hotel",
+  "restaurant",
+  "cafe",
+  "bar",
+  "spa",
+  "tour_operator",
+  "transport_service",
+  "retail",
+  "ecommerce",
+  "manufacturing",
+  "import_export",
+  "education_center",
 ];
 
 export function LicenseAnalyzer() {
+  const l = useTranslations("License");
+  const mf = useTranslations("MerchantForm");
+  // the API sends English labels; show the translated one when we have it
+  const typeText = (
+    group: "merchantType" | "merchantTypeDescription",
+    code: string,
+    fallback?: string
+  ) => (mf.has(`${group}.${code}`) ? mf(`${group}.${code}`) : fallback);
+  const activityLabel = (value: string) =>
+    mf.has(`businessActivity.${value}`)
+      ? mf(`businessActivity.${value}`)
+      : value;
   const [types, setTypes] = useState<MerchantTypeInfo[]>([]);
   const [merchantType, setMerchantType] = useState("");
   const [activities, setActivities] = useState<string[]>([]);
@@ -71,23 +92,35 @@ export function LicenseAnalyzer() {
   };
 
   return (
-    <Box component="form" onSubmit={onAnalyze} sx={{ px: { xs: 2.5, md: 3.5 }, py: 3 }}>
+    <Box
+      component="form"
+      onSubmit={onAnalyze}
+      sx={{ px: { xs: 2.5, md: 3.5 }, py: 3 }}
+    >
       <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
-        ตรวจสอบใบอนุญาตที่ต้องใช้
+        {l("analyzerTitle")}
       </Typography>
       <Stack spacing={2} sx={{ maxWidth: 720 }}>
         <TextField
           select
-          label="ประเภทกิจการ"
+          label={l("analyzerType")}
           value={merchantType}
           onChange={(event) => setMerchantType(event.target.value)}
-          helperText={types.find((type) => type.code === merchantType)?.description}
+          helperText={
+            merchantType
+              ? typeText(
+                  "merchantTypeDescription",
+                  merchantType,
+                  types.find((type) => type.code === merchantType)?.description
+                )
+              : undefined
+          }
           required
           fullWidth
         >
           {types.map((type) => (
             <MenuItem key={type.code} value={type.code}>
-              {type.label}
+              {typeText("merchantType", type.code, type.label)}
             </MenuItem>
           ))}
         </TextField>
@@ -95,37 +128,32 @@ export function LicenseAnalyzer() {
           multiple
           freeSolo
           options={activitySuggestions}
+          getOptionLabel={activityLabel}
           value={activities}
           onChange={(_, value) => setActivities(value)}
           renderInput={(params) => (
             <TextField
               {...params}
-              label="กิจกรรมของธุรกิจ"
-              helperText="เลือกหรือพิมพ์แล้วกด Enter อย่างน้อย 1 รายการ"
+              label={l("analyzerActivities")}
+              helperText={l("analyzerActivitiesHelper")}
             />
           )}
         />
-        <Stack direction={{ xs: "column", md: "row" }}>
-          <FormControlLabel
-            control={<Switch checked={hazardous} onChange={(_, checked) => setHazardous(checked)} />}
-            label="มีวัตถุอันตราย"
-          />
-          <FormControlLabel
-            control={<Switch checked={alcohol} onChange={(_, checked) => setAlcohol(checked)} />}
-            label="มีบริการเครื่องดื่มแอลกอฮอล์"
-          />
-          <FormControlLabel
-            control={<Switch checked={food} onChange={(_, checked) => setFood(checked)} />}
-            label="มีการเตรียมอาหาร"
-          />
-        </Stack>
+        <ConditionChecklist
+          values={{ hazardous, alcohol, food }}
+          onChange={(key, checked) =>
+            ({ hazardous: setHazardous, alcohol: setAlcohol, food: setFood }[
+              key
+            ](checked))
+          }
+        />
         <Button
           type="submit"
           variant="contained"
           disabled={analyzing || !merchantType || activities.length === 0}
           sx={{ alignSelf: "flex-start" }}
         >
-          {analyzing ? "กำลังวิเคราะห์..." : "วิเคราะห์ใบอนุญาต"}
+          {analyzing ? l("analyzing") : l("analyze")}
         </Button>
       </Stack>
       {result ? (

@@ -11,21 +11,19 @@ export const {
   },
   callbacks: {
     // ส่ง accessToken ไปให้ Client (useSession / getSession) ใช้ได้
-    async session({ session, token, user }) {
+    async session({ session, token }) {
       session.user.id = token.id as string;
       session.accessToken = token.accessToken as string;
+      session.user.role = token.role as string | undefined;
       return session;
     },
     // เอา accessToken ที่ได้จาก NestJS มาเก็บไว้ใน JWT ของ NextAuth
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user }) {
       if (user) {
-        // user object มาจาก authorize() ใน auth.config.ts
-        // ซึ่ง NestJS จะตอบกลับมาเป็น { accessToken, refreshToken, ... }
+        // user comes from authorize() in auth.config.ts
         token.id = user.id;
-        if (account) {
-          token.accessToken = account.access_token;
-          token.refreshToken = account.refresh_token;
-        }
+        token.accessToken = user.accessToken;
+        token.role = user.role;
       }
       return token;
     },

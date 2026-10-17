@@ -1,10 +1,9 @@
 import axios, { AxiosRequestConfig } from "axios";
-import { getSession } from "next-auth/react";
+import { getSession, signOut } from "next-auth/react";
 
 const SERVER_API_URL = process.env.API_URL;
-const CLIENT_API_URL = process.env.NEXT_PUBLIC_API_URL;
-const RESOLVED_API_URL =
-  typeof window === "undefined" ? SERVER_API_URL : CLIENT_API_URL;
+// Browser calls stay same-origin; next.config.ts rewrites /api/v1/* to the backend (no CORS needed).
+const RESOLVED_API_URL = typeof window === "undefined" ? SERVER_API_URL : "";
 
 const AxiosInstance = axios.create({
   baseURL: RESOLVED_API_URL ?? "",
@@ -41,7 +40,8 @@ AxiosInstance.interceptors.response.use(
     if (error.response?.status === 401) {
       console.error("Unauthorized - Redirecting to login...");
       if (typeof window !== "undefined") {
-        window.location.href = "/sign-in";
+        // clear the NextAuth cookie too, or proxy.ts bounces /login straight back to /home
+        void signOut({ callbackUrl: "/login" });
       }
     }
     return Promise.reject(error);

@@ -3,7 +3,12 @@
  * These routes will not be protected by the auth middleware
  * @type {string[]}
  */
-export const publicRoutes = ["/", "/home"];
+export const publicRoutes = [
+  "/",
+  "/home",
+  "/forgot-password",
+  "/reset-password",
+];
 
 /**
  * An array of routes that are used for  authentication
@@ -18,6 +23,12 @@ export const authRoutes = ["/login", "/register"];
  * @type {string}
  */
 export const apiAuthPrefix = "/api/auth";
+
+/**
+ * prefix for backend API calls proxied by next.config.ts rewrites;
+ * the backend enforces its own auth (bearer token), so the page guard skips them
+ */
+export const apiProxyPrefix = "/api/v1";
 
 /**
  * Default redirect after successful login

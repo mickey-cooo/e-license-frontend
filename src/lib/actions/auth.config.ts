@@ -23,9 +23,17 @@ export default {
 
             if (!res.ok) return null;
 
-            const user = await res.json();
-            // NestJS ควรตอบกลับมาเป็น { accessToken, refreshToken, ... }
-            return user;
+            // NestJS replies { accessToken, user: { uuid } }
+            const data = await res.json();
+            // the role is a UI hint only; the backend enforces it on every call
+            const payload = JSON.parse(
+              Buffer.from(data.accessToken.split(".")[1], "base64url").toString(),
+            );
+            return {
+              id: data.user?.uuid,
+              accessToken: data.accessToken,
+              role: payload.role as string | undefined,
+            };
           } catch {
             return null;
           }

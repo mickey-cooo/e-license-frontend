@@ -1,6 +1,7 @@
 "use server";
 
 import { instance } from "@/lib/instance";
+import { apiError } from "@/lib/helper/api-error";
 
 export interface LoginBodyInterface {
   email: string;
@@ -19,11 +20,11 @@ export async function signIn(body: LoginBodyInterface) {
       email: body.email,
       password: body.password,
     });
-    return { success: true, data: response.data, status: response.status };
+    return { success: true as const, data: response.data, status: response.status };
   } catch (error: any) {
     return {
-      success: false,
-      message: error.response.data.message,
+      success: false as const,
+      message: apiError(error, "Unable to reach the server"),
       status: error?.response?.status,
     };
   }
@@ -36,11 +37,43 @@ export async function signUp(body: RegisterBodyInterface) {
       password: body.password,
       confirmPassword: body.confirmPassword,
     });
-    return { success: true, data: response.data, status: response.status };
+    return { success: true as const, data: response.data, status: response.status };
   } catch (error: any) {
     return {
-      success: false,
-      message: error.response.data.message,
+      success: false as const,
+      message: apiError(error, "Unable to reach the server"),
+      status: error?.response?.status,
+    };
+  }
+}
+
+export async function forgotPassword(email: string) {
+  try {
+    const response = await instance.post("/api/v1/user/forgot-password", {
+      email,
+    });
+    return { success: true as const, data: response.data, status: response.status };
+  } catch (error: any) {
+    return {
+      success: false as const,
+      message: apiError(error, "Unable to send reset email"),
+      status: error?.response?.status,
+    };
+  }
+}
+
+export async function resetPassword(body: {
+  token: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}) {
+  try {
+    const response = await instance.post("/api/v1/user/reset-password", body);
+    return { success: true as const, data: response.data, status: response.status };
+  } catch (error: any) {
+    return {
+      success: false as const,
+      message: apiError(error, "Unable to reset password"),
       status: error?.response?.status,
     };
   }

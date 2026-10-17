@@ -1,76 +1,236 @@
 .page {
   min-height: 100vh;
-  padding: 24px;
-  background: #f3f6fb;
+  padding: 32px 24px 64px;
+  background: var(--desk);
 }
 
 .container {
-  max-width: 1120px;
+  max-width: 1152px;
   margin: 0 auto;
 }
 
-.hero {
-  border-radius: 20px;
-  border: 1px solid rgba(13, 71, 161, 0.18);
-  overflow: hidden;
-  background:
-    linear-gradient(120deg, rgba(13, 71, 161, 0.08), rgba(13, 71, 161, 0.02)),
-    url("https://images.unsplash.com/photo-1573496773905-f5b17e717f05?auto=format&fit=crop&w=1600&q=80")
-      center/cover;
-}
-
-.heroTitle {
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #0d2f6b;
-}
-
-.heroOverlay {
-  padding: 36px;
-  max-width: 760px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
-}
-
-.heroDescription {
-  max-width: 620px;
-}
-
-.sectionTitle {
-  margin-bottom: 14px;
-  font-weight: 700;
-  color: #0d2f6b;
-}
-
-.serviceGrid {
+.layout {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 32px;
+  align-items: start;
 }
 
-.serviceCard {
-  border-radius: 16px;
-  overflow: hidden;
-  background: #fff;
+.sheet {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  box-shadow: 0 1px 0 var(--rule-soft), 0 14px 28px -18px rgba(42, 45, 52, 0.45);
 }
 
-.tabsCard {
-  border-radius: 16px;
-  overflow: hidden;
-  background: #fff;
+.body {
+  padding: 40px 28px 32px;
 }
 
-.newsSection {
-  border-radius: 16px;
-  padding: 22px;
-  background: #fff;
+.title {
+  max-width: 18ch;
+  color: var(--ink-blue);
+  text-wrap: balance;
+}
+
+.lead {
+  max-width: 60ch;
+  margin-top: 16px;
+  color: var(--graphite-soft);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
+  border-bottom: 1px solid var(--rule);
+}
+
+.stepNo {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-stamp);
+  font-size: 1.25rem;
+  color: var(--stamp-red);
+  border-right: 1px solid var(--rule);
+}
+
+.stepText {
+  padding: 16px 20px;
+}
+
+.stepLabel {
+  font-weight: 700;
+  color: var(--graphite);
+}
+
+.stepDesc {
+  margin-top: 2px;
+  font-size: 0.9375rem;
+  color: var(--graphite-soft);
+}
+
+.stepLink {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  font-weight: 700;
+  color: var(--ink-blue);
+  text-decoration: none;
+  border-left: 1px solid var(--rule);
+  transition: background-color 160ms ease-out, color 160ms ease-out;
+
+  &:hover {
+    background: var(--ink-blue);
+    color: var(--paper);
+  }
+}
+
+.notes {
+  padding: 24px 28px 32px;
+}
+
+.notesTitle {
+  font-family: var(--font-stamp);
+  font-size: 1rem;
+  color: var(--graphite);
+}
+
+.notesList {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 68ch;
+}
+
+.note {
+  position: relative;
+  padding: 6px 0 6px 28px;
+  color: var(--graphite-soft);
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 12px;
+    width: 12px;
+    height: 12px;
+    border: 1px solid var(--rule);
+  }
+}
+
+.slots {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  box-shadow: 0 1px 0 var(--rule-soft), 0 14px 28px -18px rgba(42, 45, 52, 0.45);
+}
+
+.slotsHead {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper-sunk);
+}
+
+.slotsTitle {
+  font-family: var(--font-stamp);
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+
+.slotsSample {
+  font-size: 0.8125rem;
+  color: var(--graphite-soft);
+}
+
+.slot {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  min-height: 116px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--rule);
+
+  &:last-of-type {
+    border-bottom: 0;
+  }
+}
+
+.slotAgency {
+  font-size: 0.9375rem;
+  color: var(--graphite-soft);
+}
+
+.slotMark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slotEmpty {
+  font-size: 0.9375rem;
+  color: var(--graphite-soft);
+}
+
+.slotsFoot {
+  padding: 14px 20px;
+  font-size: 0.9375rem;
+  border-top: 1px solid var(--rule);
+  background: var(--paper-sunk);
 }
 
 @media (max-width: 900px) {
-  .serviceGrid {
-    grid-template-columns: 1fr;
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .heroOverlay {
-    padding: 24px;
+  .page {
+    padding: 16px 16px 48px;
+  }
+}
+
+@media (max-width: 560px) {
+  .body {
+    padding: 28px 18px 24px;
+  }
+
+  .step {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .stepLink {
+    grid-column: 1 / -1;
+    padding: 12px 20px;
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+  }
+}
+
+.strike {
+  position: absolute;
+  top: 214px;
+  right: 20px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .strike {
+    display: none;
   }
 }

@@ -1,187 +1,122 @@
 import { createTheme } from "@mui/material";
 
+const form = "var(--font-form)";
+const stamp = "var(--font-stamp)";
+const rule = "#2a2d34";
+const inkBlue = "#1f3b8c";
+const stampRed = "#b7222a";
+
 export const theme = createTheme({
   palette: {
     mode: "light",
-    primary: {
-      main: "#1565C0",
-      light: "#1E88E5",
-      dark: "#0D47A1",
-    },
-    secondary: {
-      main: "#F2B632",
-      light: "#FFE082",
-      dark: "#C48F00",
-    },
-    background: {
-      default: "#FFFFFF",
-      paper: "#F5F7FB",
-    },
-    text: {
-      primary: "#111827",
-      secondary: "#4B5563",
-    },
+    primary: { main: inkBlue, dark: "#172c69", light: "#3d5bb5" },
+    secondary: { main: rule },
+    error: { main: stampRed },
+    success: { main: inkBlue },
+    background: { default: "#d4d5d7", paper: "#fbfbf8" },
+    text: { primary: rule, secondary: "#4a4f5a" },
+    divider: "#b9bdc6",
   },
+  shape: { borderRadius: 2 },
   typography: {
-    fontFamily: " sans-serif",
-    h1: {
-      fontSize: "3.88rem",
-      fontWeight: 600,
-      lineHeight: 1.2,
-    },
-    h2: {
-      fontSize: "3.5rem",
-      fontWeight: 600,
-      lineHeight: 1.3,
-    },
-    h3: {
-      fontSize: "2.5rem",
-      fontWeight: 600,
-      lineHeight: 1.4,
-    },
-    h4: {
-      fontSize: "2rem",
-      fontWeight: 600,
-      lineHeight: 1.5,
-    },
-    h5: {
-      fontSize: "1.75rem",
-      fontWeight: 600,
-      lineHeight: 1.6,
-    },
-    h6: {
-      fontSize: "1.60rem",
-      fontWeight: 600,
-      lineHeight: 1.7,
-    },
-    body1: {
-      fontSize: "1.5rem",
-      lineHeight: 1.5,
-    },
-    body2: {
-      fontSize: "0.95rem",
-      lineHeight: 1.43,
-    },
-    button: {
-      textTransform: "none",
-      fontWeight: 500,
-    },
+    fontFamily: form,
+    h1: { fontFamily: stamp, fontSize: "clamp(2rem, 4.2vw, 3.25rem)", fontWeight: 500, lineHeight: 1.35 },
+    h2: { fontFamily: stamp, fontSize: "2rem", fontWeight: 500, lineHeight: 1.4 },
+    h3: { fontFamily: stamp, fontSize: "1.75rem", fontWeight: 500, lineHeight: 1.4 },
+    h4: { fontFamily: stamp, fontSize: "1.5rem", fontWeight: 500, lineHeight: 1.45 },
+    h5: { fontFamily: stamp, fontSize: "1.25rem", fontWeight: 500, lineHeight: 1.5 },
+    h6: { fontFamily: stamp, fontSize: "1.125rem", fontWeight: 500, lineHeight: 1.5 },
+    subtitle1: { fontWeight: 700, lineHeight: 1.6 },
+    body1: { fontSize: "1rem", lineHeight: 1.7 },
+    body2: { fontSize: "0.9375rem", lineHeight: 1.65 },
+    caption: { fontSize: "0.8125rem", lineHeight: 1.5 },
+    button: { textTransform: "none", fontWeight: 700 },
   },
   components: {
+    MuiCssBaseline: { styleOverrides: { body: { backgroundColor: "#d4d5d7" } } },
+    MuiPaper: {
+      defaultProps: { elevation: 0 },
+      styleOverrides: {
+        root: { backgroundImage: "none" },
+        outlined: { border: `1px solid ${rule}` },
+      },
+    },
     MuiButton: {
+      defaultProps: { disableElevation: true },
       styleOverrides: {
         root: {
-          borderRadius: 8,
-          padding: "8px 16px",
-          fontSize: "0.95rem",
-          fontWeight: 500,
-          textTransform: "none",
+          borderRadius: 2,
+          padding: "9px 20px",
+          minHeight: 44,
+          fontSize: "1rem",
           boxShadow: "none",
         },
+        containedPrimary: {
+          backgroundColor: inkBlue,
+          color: "#fbfbf8",
+          "&:hover": { backgroundColor: "#172c69", boxShadow: "none" },
+        },
+        outlinedPrimary: {
+          borderColor: rule,
+          color: rule,
+          "&:hover": { borderColor: rule, backgroundColor: "#f0f1ee" },
+        },
+        outlinedError: {
+          borderColor: stampRed,
+          "&:hover": { borderColor: stampRed },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 2,
+          fontFamily: stamp,
+          fontWeight: 500,
+          border: `1px solid ${rule}`,
+          backgroundColor: "transparent",
+        },
+        colorSuccess: { color: inkBlue, borderColor: inkBlue },
+        colorWarning: { color: rule, borderStyle: "dashed" },
+        colorError: { color: stampRed, borderColor: stampRed },
+      },
+    },
+    MuiLinearProgress: {
+      styleOverrides: {
+        root: { borderRadius: 0, backgroundColor: "#e3e5e9", border: `1px solid ${rule}` },
+        bar: { borderRadius: 0, backgroundColor: inkBlue },
       },
     },
     MuiFormHelperText: {
-      styleOverrides: {
-        root: {
-          fontSize: "0.75rem",
-          marginTop: 4,
-          lineHeight: 1.2,
-        },
-      },
+      styleOverrides: { root: { fontSize: "0.8125rem", marginLeft: 0, lineHeight: 1.4 } },
     },
-    MuiTextField: {
-      defaultProps: {
-        size: "small",
-      },
-      styleOverrides: {
-        root: {
-          label: {
-            fontSize: "0.9rem",
-          },
-          "& .MuiOutlinedInput-root": {
-            borderRadius: 8,
-            "& fieldset": {
-              borderColor: "rgba(0, 0, 0, 0.23)",
-            },
-            "&:hover fieldset": {
-              borderColor: "rgba(0, 0, 0, 0.23)",
-            },
-            "&.Mui-focused fieldset": {
-              borderColor: "rgba(0, 0, 0, 0.23)",
-              borderWidth: 1,
-            },
-            "& input::placeholder": {
-              fontSize: "0.9rem",
-            },
-            "& input": {
-              fontSize: "0.9rem",
-            },
-          },
-          "& .MuiOutlinedInput-input:-webkit-autofill": {
-            WebkitBoxShadow: "0 0 0 1000px #F5F7FB inset",
-            WebkitTextFillColor: "inherit",
-          },
-        },
-      },
+    MuiInputLabel: {
+      styleOverrides: { root: { fontSize: "1rem", color: "#4a4f5a" } },
     },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: 10,
-          minHeight: 40,
-          background: "#F5F7FB",
+          borderRadius: 2,
+          minHeight: 48,
+          backgroundColor: "#fbfbf8",
+          color: inkBlue,
+          "& fieldset": { borderColor: rule, borderWidth: 1 },
+          "&:hover fieldset": { borderColor: rule },
+          "&.Mui-focused fieldset": { borderColor: inkBlue, borderWidth: 2 },
+          "&.Mui-error fieldset": { borderColor: stampRed },
         },
         input: {
-          fontSize: "0.9rem",
-          padding: "10px 12px",
-        },
-      },
-    },
-    MuiTypography: {
-      styleOverrides: {
-        root: {
           fontSize: "1rem",
-        },
-      },
-    },
-    MuiMenuItem: {
-      styleOverrides: {
-        root: {
-          "&:hover": {
-            backgroundColor: "transparent",
-          },
-          ":active": {
-            backgroundColor: "transparent",
+          padding: "12px 14px",
+          "&::placeholder": { color: "#5b606b", opacity: 1 },
+          "&:-webkit-autofill": {
+            WebkitBoxShadow: "0 0 0 1000px #f0f1ee inset",
+            WebkitTextFillColor: inkBlue,
           },
         },
       },
     },
-  },
-});
-
-export const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: {
-      main: "#64B5F6",
-      light: "#90CAF9",
-      dark: "#1976D2",
-    },
-    secondary: {
-      main: "#F2B632",
-      light: "#FFD54F",
-      dark: "#C49000",
-    },
-    error: {
-      main: "#EF5350",
-    },
-    background: {
-      default: "#020617",
-      paper: "#020818",
-    },
-    text: {
-      primary: "#E5E7EB",
-      secondary: "#9CA3AF",
-    },
+    MuiTextField: { defaultProps: { size: "medium" } },
+    MuiMenuItem: { styleOverrides: { root: { fontSize: "1rem" } } },
   },
 });

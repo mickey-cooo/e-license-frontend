@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Chip,
   Box,
   Button,
   Paper,
@@ -41,7 +40,6 @@ export default function RegisterPage() {
       <Paper elevation={0} className={styles.card}>
         <Box className={styles.authLayout}>
           <Box className={styles.showcase}>
-            <Chip label="Smart Onboarding" size="small" className={styles.badge} />
             <Typography variant="h4" className={styles.showcaseTitle}>
               เริ่มต้นใช้งานภายในไม่กี่นาที
             </Typography>
@@ -65,18 +63,11 @@ export default function RegisterPage() {
           <Box className={styles.formPanel}>
             <Box className={styles.header}>
               <Typography
-                variant="body2"
-                className={styles.subtitle}
-                color="text.secondary"
-              >
-                ระบบ e-Licensing
-              </Typography>
-              <Typography
                 variant="h5"
                 className={styles.title}
                 color="text.primary"
               >
-                สมัครสมาชิกเพื่อขอใบอนุญาตประกอบธุรกิจโรงแรม
+                สมัครสมาชิกเพื่อขอใบอนุญาตประกอบธุรกิจทุกประเภท
               </Typography>
               <Typography
                 variant="body2"

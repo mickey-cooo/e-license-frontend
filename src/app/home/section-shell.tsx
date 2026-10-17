@@ -1,4 +1,4 @@
-import { Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import type { PropsWithChildren } from "react";
 
 interface SectionShellProps extends PropsWithChildren {
@@ -12,23 +12,26 @@ export function SectionShell({
   children,
 }: SectionShellProps) {
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: { xs: 2.5, md: 3 },
-        borderRadius: 3,
-        border: "1px solid",
-        borderColor: "divider",
-        backdropFilter: "blur(10px)",
-      }}
-    >
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.75 }}>
+    <Paper variant="outlined" component="section">
+      <Typography
+        variant="h5"
+        component="h2"
+        sx={{
+          px: { xs: 2.5, md: 3 },
+          py: 1.5,
+          borderBottom: "1px solid",
+          bgcolor: "action.hover",
+        }}
+      >
         {title}
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
+      <Typography
+        color="text.secondary"
+        sx={{ px: { xs: 2.5, md: 3 }, pt: 2.5, pb: 2.5, maxWidth: "70ch" }}
+      >
         {description}
       </Typography>
-      {children}
+      <Box sx={{ px: { xs: 2.5, md: 3 }, pb: 3 }}>{children}</Box>
     </Paper>
   );
 }

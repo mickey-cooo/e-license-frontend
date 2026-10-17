@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Chip,
   Box,
   Button,
   Paper,
@@ -63,11 +62,6 @@ export default function LoginPage() {
       <Paper elevation={0} className={styles.card}>
         <Box className={styles.authLayout}>
           <Box className={styles.showcase}>
-            <Chip
-              label="e-Licensing Platform"
-              size="small"
-              className={styles.badge}
-            />
             <Typography variant="h4" className={styles.showcaseTitle}>
               ยินดีต้อนรับกลับ
             </Typography>
@@ -91,18 +85,11 @@ export default function LoginPage() {
           <Box className={styles.formPanel}>
             <Box className={styles.header}>
               <Typography
-                variant="body2"
-                className={styles.subtitle}
-                color="text.secondary"
-              >
-                ระบบ e-Licensing
-              </Typography>
-              <Typography
                 variant="h5"
                 className={styles.title}
                 color="text.primary"
               >
-                เข้าสู่ระบบขอใบอนุญาตประกอบธุรกิจโรงแรม
+                เข้าสู่ระบบขอใบอนุญาตประกอบธุรกิจทุกประเภท
               </Typography>
               <Typography
                 variant="body2"
@@ -151,6 +138,10 @@ export default function LoginPage() {
             </Box>
 
             <Typography variant="body2" className={styles.panelFooter}>
+              <Link href="/forgot-password" className={styles.footerLink}>
+                ลืมรหัสผ่าน?
+              </Link>
+              {" · "}
               ยังไม่มีบัญชี?{" "}
               <Link href="/register" className={styles.footerLink}>
                 สมัครสมาชิก

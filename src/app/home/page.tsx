@@ -1,80 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardMedia,
-  Box,
-  Button,
-  Chip,
-  Container,
-  Divider,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
-import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
-import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
-import ManageSearchRoundedIcon from "@mui/icons-material/ManageSearchRounded";
-import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
+import { Button, Typography } from "@mui/material";
+import { Stamp } from "../components/stamp";
 import styles from "./page.module.scss";
 
-const serviceItems = [
-  {
-    title: "ยื่นขอใบอนุญาตในระบบเดียว",
-    description: "ยื่นคำขอหลายหน่วยงานผ่าน e-Licensing ลดการยื่นซ้ำหลายรอบ",
-    href: undefined,
-    image:
-      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    title: "แนะนำใบอนุญาต",
-    description:
-      "วิเคราะห์ประเภทกิจการเพื่อแนะนำใบอนุญาตที่ต้องขออย่างเป็นขั้นตอน",
-    href: "/home/license",
-    image:
-      "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    title: "Dashboard ติดตามสถานะ",
-    description:
-      "ตรวจสอบความคืบหน้าและรับแจ้งเตือนในจุดเดียว ลดการโทรติดตามด้วยตนเอง",
-    href: "/home/dashboard",
-    image:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
-  },
-] as const;
-
-const quickActions = [
+const steps = [
   {
     label: "ดูแนะนำใบอนุญาต",
     description: "ตรวจสอบประเภทกิจการทั้งหมด เพื่อเลือกแนวทางยื่นใบอนุญาตให้ตรงหมวด",
     href: "/home/license",
-    icon: <FactCheckRoundedIcon fontSize="small" />,
   },
   {
     label: "ลงทะเบียนผู้ประกอบการ",
     description: "เริ่มต้นด้วยการยืนยันตัวตนและสร้างข้อมูลผู้ประกอบการในระบบ",
     href: "/home/merchant",
-    icon: <StorefrontRoundedIcon fontSize="small" />,
   },
   {
     label: "อัปโหลดเอกสารคำขอ",
     description:
       "แนบเอกสารประกอบที่จำเป็น เพื่อลดความซ้ำซ้อนในการยื่นหลายหน่วยงาน",
     href: "/home/document",
-    icon: <DescriptionRoundedIcon fontSize="small" />,
   },
   {
     label: "ติดตามผลการพิจารณา",
     description: "ติดตามสถานะคำขอทุกใบอนุญาตแบบรวมศูนย์ผ่าน Dashboard",
     href: "/home/tracker",
-    icon: <ManageSearchRoundedIcon fontSize="small" />,
   },
 ] as const;
 
-const infoItems = [
+const notes = [
   "เช็กใบอนุญาตที่ต้องใช้ให้ครบก่อนยื่นคำขอ เพื่อลดการส่งเอกสารซ้ำ",
   "อัปโหลดเอกสารครั้งเดียว แล้วติดตามสถานะได้จากหน้า Dashboard",
   "หากบางขั้นตอนยังต้องใช้เอกสารจริง ระบบจะแจ้งขั้นตอนต่อไปให้ชัดเจน",
@@ -83,149 +38,92 @@ const infoItems = [
 
 export default function HomePage() {
   return (
-    <Box component="main" className={styles.page}>
-      <Container className={styles.container} disableGutters>
-        <Stack spacing={4}>
-          <Paper elevation={0} className={styles.hero} variant="outlined">
-            <Box className={styles.heroOverlay}>
-              <Chip
-                label="Digital Platform for Hotel Licensing"
-                color="primary"
-                variant="outlined"
-                sx={{ width: "fit-content", borderRadius: 999, mb: 2 }}
-              />
-              <Typography variant="h3" className={styles.heroTitle}>
-                ระบบการขอใบอนุญาตประกอบธุรกิจโรงแรม
+    <main className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.layout}>
+          <article className={styles.sheet}>
+            <div className={styles.strike} aria-hidden="true">
+              <Stamp label="อนุมัติแล้ว" tone="blue" tilt={-9} delayMs={400} large />
+            </div>
+
+            <div className={styles.body}>
+              <Typography variant="h1" component="h1" className={styles.title}>
+                ระบบการขอใบอนุญาตประกอบธุรกิจทุกประเภท
               </Typography>
-              <Typography
-                color="text.secondary"
-                className={styles.heroDescription}
-              >
+              <Typography className={styles.lead}>
                 ศูนย์กลางการยื่นคำขอใบอนุญาตที่ช่วยลดเอกสารซ้ำซ้อน
                 จัดลำดับขั้นตอนให้ชัดเจน และติดตามความคืบหน้าได้ในที่เดียว
               </Typography>
-              <Button
-                component={Link}
-                href="/home/merchant"
-                variant="contained"
-                sx={{
-                  width: "fit-content",
-                  borderRadius: 999,
-                  textTransform: "none",
-                  mt: 1,
-                }}
-              >
-                เริ่มลงทะเบียนคำขอ
-              </Button>
-            </Box>
-          </Paper>
-
-          <Box>
-            <Typography variant="h5" className={styles.sectionTitle}>
-              ฟีเจอร์หลักของระบบ
-            </Typography>
-            <Box className={styles.serviceGrid}>
-              {serviceItems.map((item) => (
-                <Card
-                  key={item.title}
-                  elevation={0}
-                  variant="outlined"
-                  className={styles.serviceCard}
-                  component={item.href ? Link : "div"}
-                  href={item.href}
-                  sx={
-                    item.href
-                      ? {
-                          textDecoration: "none",
-                          color: "inherit",
-                          cursor: "pointer",
-                          transition: "all 180ms ease",
-                          "&:hover": {
-                            transform: "translateY(-2px)",
-                            boxShadow: "0 8px 18px rgba(13, 71, 161, 0.10)",
-                          },
-                        }
-                      : undefined
-                  }
+              <div className={styles.actions}>
+                <Button
+                  component={Link}
+                  href="/home/merchant"
+                  variant="contained"
                 >
-                  <CardMedia
-                    component="img"
-                    height="180"
-                    image={item.image}
-                    alt={item.title}
-                  />
-                  <CardContent>
-                    <Typography fontWeight={700}>{item.title}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {item.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-          </Box>
+                  เริ่มลงทะเบียนคำขอ
+                </Button>
+                <Button component={Link} href="/home/license" variant="outlined">
+                  ดูแนะนำใบอนุญาต
+                </Button>
+              </div>
+            </div>
 
-          <Box>
-            <Typography variant="h5" className={styles.sectionTitle}>
-              ขั้นตอนการใช้งาน
-            </Typography>
-            <Stack spacing={2}>
-              {quickActions.map((item) => (
-                <Paper
-                  key={item.href}
-                  elevation={0}
-                  className={styles.tabsCard}
-                  variant="outlined"
-                >
-                  <Stack
-                    direction={{ xs: "column", md: "row" }}
-                    spacing={1.5}
-                    alignItems={{ xs: "flex-start", md: "center" }}
-                    justifyContent="space-between"
-                    sx={{ p: { xs: 2, md: 2.5 } }}
-                  >
-                    <Stack spacing={0.5}>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        {item.icon}
-                        <Typography fontWeight={700}>{item.label}</Typography>
-                      </Stack>
-                      <Typography variant="body2" color="text.secondary">
-                        {item.description}
-                      </Typography>
-                    </Stack>
-                    <Button
-                      component={Link}
-                      href={item.href}
-                      variant="contained"
-                      sx={{ borderRadius: 999, textTransform: "none" }}
-                    >
-                      ดำเนินการ
-                    </Button>
-                  </Stack>
-                </Paper>
+            <ol className={styles.steps}>
+              {steps.map((step, index) => (
+                <li key={step.href} className={styles.step}>
+                  <span className={styles.stepNo}>{index + 1}</span>
+                  <div className={styles.stepText}>
+                    <div className={styles.stepLabel}>{step.label}</div>
+                    <div className={styles.stepDesc}>{step.description}</div>
+                  </div>
+                  <Link href={step.href} className={styles.stepLink}>
+                    ดำเนินการ
+                  </Link>
+                </li>
               ))}
-            </Stack>
-          </Box>
+            </ol>
 
-          <Paper
-            elevation={0}
-            variant="outlined"
-            className={styles.newsSection}
-          >
-            <Typography variant="h5" className={styles.sectionTitle}>
-              ข้อมูลที่ควรรู้ก่อนเริ่มใช้งาน
-            </Typography>
-            <Stack spacing={1.25} mt={1}>
-              {infoItems.map((item) => (
-                <Box key={item}>
-                  <Typography>{item}</Typography>
-                  <Divider sx={{ mt: 1.25 }} />
-                </Box>
-              ))}
-            </Stack>
-          </Paper>
-        </Stack>
-      </Container>
-    </Box>
+            <div className={styles.notes}>
+              <h2 className={styles.notesTitle}>หมายเหตุ</h2>
+              <ul className={styles.notesList}>
+                {notes.map((note) => (
+                  <li key={note} className={styles.note}>
+                    {note}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </article>
+
+          <aside className={styles.slots} aria-label="ตัวอย่างการประทับตรา">
+            <div className={styles.slotsHead}>
+              <h2 className={styles.slotsTitle}>ตราประทับของหน่วยงาน</h2>
+              <p className={styles.slotsSample}>ตัวอย่างประกอบ ไม่ใช่ข้อมูลจริง</p>
+            </div>
+            <div className={styles.slot}>
+              <span className={styles.slotAgency}>หน่วยงานที่ 1</span>
+              <div className={styles.slotMark}>
+                <Stamp label="อนุมัติแล้ว" tone="blue" tilt={-5} />
+              </div>
+            </div>
+            <div className={styles.slot}>
+              <span className={styles.slotAgency}>หน่วยงานที่ 2</span>
+              <div className={styles.slotMark}>
+                <Stamp label="ต้องแก้ไข" tone="red" tilt={3} />
+              </div>
+            </div>
+            <div className={styles.slot}>
+              <span className={styles.slotAgency}>หน่วยงานที่ 3</span>
+              <div className={styles.slotMark}>
+                <span className={styles.slotEmpty}>รอตรวจเอกสาร</span>
+              </div>
+            </div>
+            <p className={styles.slotsFoot}>
+              ยื่นเอกสารครั้งเดียว แต่ละหน่วยงานประทับตราผลการพิจารณาของตนเอง
+            </p>
+          </aside>
+        </div>
+      </div>
+    </main>
   );
 }

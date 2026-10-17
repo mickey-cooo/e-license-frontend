@@ -1,203 +1,137 @@
-import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
-import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
-import NotificationImportantRoundedIcon from "@mui/icons-material/NotificationImportantRounded";
-import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
-import {
-  Box,
-  Chip,
-  Container,
-  LinearProgress,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+"use client";
+
+import { useEffect, useState } from "react";
+import { Box, Container, Stack } from "@mui/material";
+import { toast } from "react-toastify";
+import { Stamp } from "../../components/stamp";
 import { SectionShell } from "../section-shell";
+import { getDocuments, type DocumentItem } from "@/service/document.service";
+import { getMerchants, type MerchantItem } from "@/service/merchant.service";
 import styles from "../page.module.scss";
+import ledger from "./dashboard.module.scss";
 
-const highlights = [
-  {
-    icon: <DashboardRoundedIcon fontSize="small" />,
-    label: "ภาพรวมสถานะคำขอ",
-  },
-  {
-    icon: <InsightsRoundedIcon fontSize="small" />,
-    label: "ติดตามเอกสารแบบเรียลไทม์",
-  },
-  {
-    icon: <NotificationImportantRoundedIcon fontSize="small" />,
-    label: "รวมแจ้งเตือนสำคัญในหน้าเดียว",
-  },
+const documentStatuses = [
+  ["submitted", "ส่งแล้ว"],
+  ["forwarded_to_admin", "ส่งต่อผู้ดูแล"],
+  ["in_review", "กำลังตรวจสอบ"],
+  ["approved", "อนุมัติแล้ว"],
+  ["rejected", "ไม่อนุมัติ"],
 ] as const;
 
-const mockSummary = [
-  { label: "คำขอทั้งหมด", value: 128, color: "#0d47a1" },
-  { label: "อนุมัติแล้ว", value: 84, color: "#2e7d32" },
-  { label: "รอตรวจเอกสาร", value: 31, color: "#ed6c02" },
-  { label: "ต้องแก้ไข", value: 13, color: "#d32f2f" },
+const merchantStatuses = [
+  ["pending", "รอดำเนินการ"],
+  ["approved", "อนุมัติแล้ว"],
+  ["rejected", "ไม่อนุมัติ"],
 ] as const;
 
-const mockAgencyStatus = [
-  { agency: "กรมพัฒนาธุรกิจการค้า", progress: 88, done: 44, total: 50 },
-  { agency: "กรมสรรพากร", progress: 72, done: 36, total: 50 },
-  { agency: "สำนักงานเขต", progress: 56, done: 28, total: 50 },
-] as const;
+const labelOf = (list: readonly (readonly [string, string])[], status?: string) =>
+  list.find(([value]) => value === status)?.[1] ?? status ?? "-";
 
-const mockLatestRequests = [
-  {
-    requestNo: "EL-2026-00419",
-    merchant: "BlueWave Hotel",
-    status: "รอตรวจเอกสาร",
-  },
-  {
-    requestNo: "EL-2026-00417",
-    merchant: "Sunrise Stay",
-    status: "อนุมัติแล้ว",
-  },
-  {
-    requestNo: "EL-2026-00411",
-    merchant: "Moonlight Residence",
-    status: "ต้องแก้ไขข้อมูล",
-  },
-  {
-    requestNo: "EL-2026-00403",
-    merchant: "Seaside Resort",
-    status: "กำลังพิจารณา",
-  },
-] as const;
+function statusTone(status?: string) {
+  if (status === "approved") return "blue";
+  if (status === "rejected") return "red";
+  return "graphite";
+}
 
 export default function DashboardPage() {
+  const [documents, setDocuments] = useState<DocumentItem[]>([]);
+  const [documentTotal, setDocumentTotal] = useState(0);
+  const [merchants, setMerchants] = useState<MerchantItem[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    void Promise.all([getDocuments({ limit: 100 }), getMerchants()]).then(
+      ([docs, shops]) => {
+        if (!active) return;
+        if (!docs.success) toast.error(docs.message);
+        else {
+          setDocuments(docs.data);
+          setDocumentTotal(docs.total);
+        }
+        if (!shops.success) toast.error(shops.message);
+        else setMerchants(shops.data);
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const count = <T extends { status?: string }>(items: T[], status: string) =>
+    items.filter((item) => item.status === status).length;
+
   return (
     <Box component="main" className={styles.page}>
       <Container className={styles.container} disableGutters>
-        <Stack spacing={2.5}>
+        <Stack spacing={3}>
           <SectionShell
             title="Dashboard ติดตามสถานะ"
-            description="รวมการติดตามความคืบหน้าของใบอนุญาตและเอกสารไว้ในหน้าเดียว เพื่อให้ผู้ประกอบการตรวจสอบได้สะดวกขึ้น"
+            description="สรุปสถานะเอกสารและผู้ประกอบการของคุณจากข้อมูลในระบบ"
           >
-            <Stack
-              direction="row"
-              gap={1}
-              useFlexGap
-              flexWrap="wrap"
-              sx={{ mb: 2.5 }}
-            >
-              {highlights.map((item) => (
-                <Chip
-                  key={item.label}
-                  icon={item.icon}
-                  label={item.label}
-                  variant="outlined"
-                />
-              ))}
-            </Stack>
+            <table className={ledger.table}>
+              <caption className={ledger.caption}>
+                เอกสารทั้งหมด {documentTotal} รายการ
+              </caption>
+              <tbody>
+                {documentStatuses.map(([value, label]) => (
+                  <tr key={value}>
+                    <th scope="row">{label}</th>
+                    <td>{count(documents, value)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-            <Stack
-              direction={{ xs: "column", md: "row" }}
-              gap={1.5}
-              useFlexGap
-              flexWrap="wrap"
-              sx={{ mb: 2.5 }}
-            >
-              {mockSummary.map((item) => (
-                <Paper
-                  key={item.label}
-                  variant="outlined"
-                  sx={{
-                    p: 2,
-                    borderRadius: 2.5,
-                    flex: "1 1 220px",
-                    minWidth: { xs: "100%", md: "220px" },
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    {item.label}
-                  </Typography>
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    spacing={1}
-                    sx={{ mt: 0.75 }}
-                  >
-                    <TrendingUpRoundedIcon
-                      sx={{ color: item.color }}
-                      fontSize="small"
-                    />
-                    <Typography
-                      variant="h4"
-                      sx={{ fontWeight: 700, color: item.color }}
-                    >
-                      {item.value}
-                    </Typography>
-                  </Stack>
-                </Paper>
-              ))}
-            </Stack>
-
-            <Stack spacing={1.25}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                ความคืบหน้าแยกตามหน่วยงาน
-              </Typography>
-              {mockAgencyStatus.map((item) => (
-                <Paper
-                  key={item.agency}
-                  variant="outlined"
-                  sx={{ p: 2, borderRadius: 2.5 }}
-                >
-                  <Stack
-                    direction={{ xs: "column", sm: "row" }}
-                    justifyContent="space-between"
-                    sx={{ mb: 0.75 }}
-                  >
-                    <Typography sx={{ fontWeight: 600 }}>
-                      {item.agency}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {item.done}/{item.total} คำขอ
-                    </Typography>
-                  </Stack>
-                  <LinearProgress
-                    variant="determinate"
-                    value={item.progress}
-                    sx={{ height: 8, borderRadius: 99 }}
-                  />
-                </Paper>
-              ))}
-            </Stack>
+            <table className={ledger.table}>
+              <caption className={ledger.caption}>
+                ผู้ประกอบการ {merchants.length} ราย
+              </caption>
+              <tbody>
+                {merchantStatuses.map(([value, label]) => (
+                  <tr key={value}>
+                    <th scope="row">{label}</th>
+                    <td>{count(merchants, value)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </SectionShell>
 
           <SectionShell
-            title="คำขอล่าสุด (Mock Data)"
-            description="รายการคำขอล่าสุดสำหรับติดตามสถานะอย่างรวดเร็ว"
+            title="เอกสารล่าสุด"
+            description="รายการเอกสารที่ส่งล่าสุดและสถานะปัจจุบัน"
           >
-            <Stack spacing={1.25}>
-              {mockLatestRequests.map((item) => (
-                <Paper
-                  key={item.requestNo}
-                  variant="outlined"
-                  sx={{ p: 1.75, borderRadius: 2.5, backgroundColor: "#fff" }}
-                >
-                  <Stack
-                    direction={{ xs: "column", md: "row" }}
-                    justifyContent="space-between"
-                    spacing={0.5}
-                  >
-                    <Box>
-                      <Typography sx={{ fontWeight: 700 }}>
-                        {item.requestNo}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        ผู้ประกอบการ: {item.merchant}
-                      </Typography>
-                    </Box>
-                    <Chip
-                      label={item.status}
-                      color="primary"
-                      variant="outlined"
-                    />
-                  </Stack>
-                </Paper>
-              ))}
-            </Stack>
+            {documents.length === 0 ? (
+              <p>ยังไม่มีเอกสารในระบบ</p>
+            ) : (
+              <div className={ledger.scroll}>
+                <table className={ledger.table}>
+                  <thead>
+                    <tr>
+                      <th scope="col">ชื่อเอกสาร</th>
+                      <th scope="col">ประเภท</th>
+                      <th scope="col">สถานะ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {documents.slice(0, 8).map((doc) => (
+                      <tr key={doc.uuid}>
+                        <th scope="row">{doc.title}</th>
+                        <td>{doc.documentType}</td>
+                        <td>
+                          <Stamp
+                            label={labelOf(documentStatuses, doc.status)}
+                            tone={statusTone(doc.status)}
+                            tilt={-2}
+                            plain
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </SectionShell>
         </Stack>
       </Container>

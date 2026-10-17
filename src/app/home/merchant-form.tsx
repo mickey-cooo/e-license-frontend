@@ -22,7 +22,13 @@ import {
   type MerchantSchema,
 } from "@/schema/merchant.schema";
 import { merchantTypeOptions } from "@/service/merchant-type";
-import { createMerchant } from "@/service/merchant.service";
+import { useState } from "react";
+import {
+  analyzeMerchantLicenses,
+  createMerchant,
+} from "@/service/merchant.service";
+import type { LicenseRecommendation } from "@/service/license-advisory.service";
+import { LicenseRecommendations } from "./license-recommendations";
 
 const businessActivityOptions = [
   { value: "hotel", labelKey: "businessActivity.hotel" },
@@ -39,11 +45,14 @@ const businessActivityOptions = [
   { value: "education_center", labelKey: "businessActivity.education_center" },
 ];
 
-export function MerchantForm() {
+export function MerchantForm({ onCreated }: { onCreated?: () => void }) {
   const t = useTranslations("MerchantForm");
+  const [preview, setPreview] = useState<LicenseRecommendation[] | null>(null);
+  const [previewing, setPreviewing] = useState(false);
   const {
     control,
     register,
+    getValues,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<MerchantFormValues, undefined, MerchantSchema>({
@@ -73,9 +82,38 @@ export function MerchantForm() {
     const result = await createMerchant(payload);
     if (result.success) {
       toast.success("สมัคร Merchant สำเร็จ");
+      setPreview(
+        result.data?.data?.licenseAnalysis?.recommendedLicenses ?? null,
+      );
+      onCreated?.();
       return;
     }
     toast.error(result.message ?? "ไม่สามารถสมัคร Merchant ได้");
+  };
+
+  const onPreview = async () => {
+    const values = getValues();
+    if (!values.merchantType) {
+      toast.error("กรุณาเลือกประเภทธุรกิจก่อน");
+      return;
+    }
+    setPreviewing(true);
+    const result = await analyzeMerchantLicenses({
+      merchantType: values.merchantType,
+      businessActivities: values.businessActivities?.filter(Boolean) ?? [],
+      handlesHazardousMaterial: values.handlesHazardousMaterial,
+      hasAlcoholService: values.hasAlcoholService,
+      hasFoodPreparation: values.hasFoodPreparation,
+    });
+    setPreviewing(false);
+    if (!result.success) {
+      toast.error(result.message);
+      return;
+    }
+    setPreview(
+      (result.data as { recommendedLicenses?: LicenseRecommendation[] })
+        ?.recommendedLicenses ?? [],
+    );
   };
 
   return (
@@ -281,14 +319,23 @@ export function MerchantForm() {
         />
       </Stack>
 
-      <Button
-        type="submit"
-        variant="contained"
-        sx={{ mt: 2.5, borderRadius: 999 }}
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? "กำลังส่งข้อมูล..." : "สมัครเป็น Merchant"}
-      </Button>
+      <Stack direction="row" spacing={1.5} sx={{ mt: 2.5 }}>
+        <Button type="submit" variant="contained" disabled={isSubmitting}>
+          {isSubmitting ? "กำลังส่งข้อมูล..." : "สมัครเป็น Merchant"}
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => void onPreview()}
+          disabled={previewing}
+        >
+          {previewing ? "กำลังตรวจสอบ..." : "ตรวจสอบใบอนุญาตที่ต้องใช้"}
+        </Button>
+      </Stack>
+      {preview ? (
+        <Box sx={{ mt: 3 }}>
+          <LicenseRecommendations licenses={preview} />
+        </Box>
+      ) : null}
     </Box>
   );
 }

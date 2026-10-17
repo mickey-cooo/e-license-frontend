@@ -23,8 +23,10 @@ import {
   Typography,
 } from "@mui/material";
 import { toast } from "react-toastify";
+import { LicenseRecommendations } from "./license-recommendations";
 import {
   deleteMerchant,
+  getMerchantById,
   getMerchants,
   reviewMerchant,
   type MerchantItem,
@@ -65,6 +67,7 @@ export function MerchantManager() {
   const [reviewStatus, setReviewStatus] = useState<ReviewStatus>("approved");
   const [remark, setRemark] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [details, setDetails] = useState<MerchantItem | null>(null);
 
   const loadMerchants = useCallback(async () => {
     setLoading(true);
@@ -92,6 +95,10 @@ export function MerchantManager() {
     setSelectedMerchant(merchant);
     setReviewStatus("approved");
     setRemark(merchant.remark ?? "");
+    setDetails(null);
+    void getMerchantById(merchant.uuid).then((result) => {
+      if (result.success) setDetails(result.data);
+    });
   };
 
   const closeReviewDialog = () => {
@@ -253,6 +260,18 @@ export function MerchantManager() {
                 {selectedMerchant?.contactEmail ?? "-"}
               </Typography>
             </Box>
+            {details?.licenseAnalysisSnapshot?.result?.recommendedLicenses ? (
+              <Box>
+                <Typography fontWeight={700} sx={{ mb: 1 }}>
+                  ใบอนุญาตที่ระบบวิเคราะห์ไว้
+                </Typography>
+                <LicenseRecommendations
+                  licenses={
+                    details.licenseAnalysisSnapshot.result.recommendedLicenses
+                  }
+                />
+              </Box>
+            ) : null}
             <TextField
               select
               label="ผลการพิจารณา"

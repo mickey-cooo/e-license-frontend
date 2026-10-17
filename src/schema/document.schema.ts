@@ -10,7 +10,6 @@ export const documentSchema = z.object({
     .uuid("merchantUuid ต้องเป็น UUID ที่ถูกต้อง")
     .or(z.literal(""))
     .optional(),
-  submittedBy: z.string().optional(),
 });
 
 export const trackerSchema = z.object({

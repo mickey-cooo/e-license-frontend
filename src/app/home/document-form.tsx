@@ -25,6 +25,7 @@ export function DocumentForm() {
     control,
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<DocumentSchema>({
     resolver: zodResolver(documentSchema),
@@ -34,7 +35,6 @@ export function DocumentForm() {
       fileUrl: "",
       description: "",
       merchantUuid: "",
-      submittedBy: "",
     },
   });
 
@@ -80,6 +80,7 @@ export function DocumentForm() {
     const result = await createDocument(values);
     if (result.success) {
       toast.success("ส่งเอกสารสำเร็จ");
+      reset();
       return;
     }
     toast.error(result.message ?? "ไม่สามารถส่งเอกสารได้");
@@ -176,18 +177,6 @@ export function DocumentForm() {
             )}
           />
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <TextField
-            label="ผู้ส่งเอกสาร (ระบบ/ผู้ใช้)"
-            size="small"
-            margin="dense"
-            fullWidth
-            sx={compactTextFieldSx}
-            error={Boolean(errors.submittedBy)}
-            helperText={errors.submittedBy?.message}
-            {...register("submittedBy")}
-          />
-        </Grid>
         <Grid size={12}>
           <TextField
             label="รายละเอียด (ถ้ามี)"
@@ -206,7 +195,7 @@ export function DocumentForm() {
       <Button
         type="submit"
         variant="contained"
-        sx={{ mt: 2.5, borderRadius: 999 }}
+        sx={{ mt: 2.5, borderRadius: 1 }}
         disabled={isSubmitting}
       >
         {isSubmitting ? "กำลังส่งเอกสาร..." : "ส่งเอกสาร"}

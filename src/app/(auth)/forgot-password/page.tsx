@@ -1,0 +1,82 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
+import { toast } from "react-toastify";
+import { forgotPassword } from "@/service/user.service";
+import styles from "../login/page.module.scss";
+
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setSending(true);
+    const result = await forgotPassword(email.trim());
+    setSending(false);
+    if (!result.success) {
+      toast.error(result.message);
+      return;
+    }
+    setSent(true);
+  };
+
+  return (
+    <Box component="main" className={styles.page}>
+      <Paper elevation={0} className={styles.card} sx={{ maxWidth: 520 }}>
+        <Box className={styles.formPanel}>
+          <Box className={styles.header}>
+            <Typography variant="h5" className={styles.title}>
+              ลืมรหัสผ่าน
+            </Typography>
+            <Typography
+              variant="body2"
+              className={styles.description}
+              color="text.secondary"
+            >
+              กรอกอีเมลที่ใช้สมัคร ระบบจะส่งลิงก์ตั้งรหัสผ่านใหม่ให้
+            </Typography>
+          </Box>
+
+          {sent ? (
+            <Typography role="status">
+              หากอีเมลนี้อยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปแล้ว
+              กรุณาตรวจสอบกล่องจดหมาย
+            </Typography>
+          ) : (
+            <Box component="form" onSubmit={onSubmit}>
+              <Stack spacing={2}>
+                <TextField
+                  label="อีเมล"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                  fullWidth
+                />
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={sending || !email}
+                  className={styles.submitButton}
+                >
+                  {sending ? "กำลังส่ง..." : "ส่งลิงก์ตั้งรหัสผ่านใหม่"}
+                </Button>
+              </Stack>
+            </Box>
+          )}
+
+          <Typography variant="body2" className={styles.panelFooter}>
+            <Link href="/login" className={styles.footerLink}>
+              กลับไปเข้าสู่ระบบ
+            </Link>
+          </Typography>
+        </Box>
+      </Paper>
+    </Box>
+  );
+}

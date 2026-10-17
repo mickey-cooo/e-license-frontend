@@ -13,6 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import {
   getMyMerchant,
@@ -22,20 +23,17 @@ import {
 import { LicenseRecommendations } from "./license-recommendations";
 
 const editable = [
-  ["merchantName", "ชื่อกิจการ"],
-  ["contactName", "ชื่อผู้ติดต่อ"],
-  ["contactEmail", "อีเมลผู้ติดต่อ"],
-  ["contactPhoneNumber", "เบอร์โทรผู้ติดต่อ"],
-  ["businessAddress", "ที่อยู่กิจการ"],
+  ["merchantName", "name"],
+  ["contactName", "contactName"],
+  ["contactEmail", "contactEmail"],
+  ["contactPhoneNumber", "contactPhone"],
+  ["businessAddress", "address"],
 ] as const;
 
-const statusText: Record<string, string> = {
-  pending: "รอดำเนินการ",
-  approved: "อนุมัติแล้ว",
-  rejected: "ไม่อนุมัติ",
-};
-
 export function MyMerchantCard({ refreshKey }: { refreshKey: number }) {
+  const m = useTranslations("Merchant");
+  const common = useTranslations("Common");
+  const status = useTranslations("Status");
   const [merchant, setMerchant] = useState<MerchantItem | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -61,8 +59,11 @@ export function MyMerchantCard({ refreshKey }: { refreshKey: number }) {
   const openEdit = () => {
     setDraft(
       Object.fromEntries(
-        editable.map(([key]) => [key, (merchant[key] as string | undefined) ?? ""]),
-      ),
+        editable.map(([key]) => [
+          key,
+          (merchant[key] as string | undefined) ?? "",
+        ])
+      )
     );
     setEditing(true);
   };
@@ -75,7 +76,7 @@ export function MyMerchantCard({ refreshKey }: { refreshKey: number }) {
       toast.error(result.message);
       return;
     }
-    toast.success("บันทึกข้อมูลผู้ประกอบการสำเร็จ");
+    toast.success(m("updated"));
     setEditing(false);
     setReload((value) => value + 1);
   };
@@ -85,40 +86,57 @@ export function MyMerchantCard({ refreshKey }: { refreshKey: number }) {
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 1.5 }}
+      >
         <Box>
           <Typography variant="h6" component="h2">
-            กิจการของฉัน: {merchant.merchantName}
+            {m("mine", { name: merchant.merchantName })}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {merchant.contactName} · {merchant.contactEmail} · {merchant.contactPhoneNumber}
+            {merchant.contactName} · {merchant.contactEmail} ·{" "}
+            {merchant.contactPhoneNumber}
           </Typography>
         </Box>
         <Stack direction="row" spacing={1} alignItems="center">
-          <Chip label={statusText[merchant.status ?? "pending"] ?? merchant.status} />
+          <Chip
+            label={status(
+              merchant.status === "approved" || merchant.status === "rejected"
+                ? merchant.status
+                : "pending"
+            )}
+          />
           <Button variant="outlined" onClick={openEdit}>
-            แก้ไขข้อมูล
+            {m("editData")}
           </Button>
         </Stack>
       </Stack>
       {merchant.remark ? (
         <Typography variant="body2" sx={{ mb: 1.5 }}>
-          หมายเหตุจากผู้ตรวจ: {merchant.remark}
+          {m("reviewerRemark", { remark: merchant.remark })}
         </Typography>
       ) : null}
       <Typography fontWeight={700} sx={{ mb: 1 }}>
-        ใบอนุญาตที่ต้องใช้
+        {m("requiredLicenses")}
       </Typography>
       <LicenseRecommendations licenses={licenses} />
 
-      <Dialog open={editing} onClose={() => !saving && setEditing(false)} fullWidth maxWidth="sm">
-        <DialogTitle>แก้ไขข้อมูลผู้ประกอบการ</DialogTitle>
+      <Dialog
+        open={editing}
+        onClose={() => !saving && setEditing(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>{m("editTitle")}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
-            {editable.map(([key, label]) => (
+            {editable.map(([key, labelKey]) => (
               <TextField
                 key={key}
-                label={label}
+                label={m(labelKey)}
                 value={draft[key] ?? ""}
                 onChange={(event) =>
                   setDraft((prev) => ({ ...prev, [key]: event.target.value }))
@@ -130,10 +148,14 @@ export function MyMerchantCard({ refreshKey }: { refreshKey: number }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditing(false)} disabled={saving}>
-            ยกเลิก
+            {common("cancel")}
           </Button>
-          <Button variant="contained" onClick={() => void onSave()} disabled={saving}>
-            {saving ? "กำลังบันทึก..." : "บันทึก"}
+          <Button
+            variant="contained"
+            onClick={() => void onSave()}
+            disabled={saving}
+          >
+            {saving ? m("saving") : common("save")}
           </Button>
         </DialogActions>
       </Dialog>

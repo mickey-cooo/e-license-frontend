@@ -22,6 +22,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { LicenseRecommendations } from "./license-recommendations";
 import {
@@ -34,21 +35,15 @@ import {
 
 type ReviewStatus = "approved" | "rejected";
 
-const statusOptions = [
-  { value: "", label: "ทั้งหมด" },
-  { value: "pending", label: "รอดำเนินการ" },
-  { value: "approved", label: "อนุมัติแล้ว" },
-  { value: "rejected", label: "ไม่อนุมัติ" },
-] as const;
+const statusOptions = ["", "pending", "approved", "rejected"] as const;
 
-function getStatusLabel(status?: string) {
-  if (status === "approved") return "อนุมัติแล้ว";
-  if (status === "rejected") return "ไม่อนุมัติ";
-  return "รอดำเนินการ";
+function getStatusKey(status?: string) {
+  if (status === "approved" || status === "rejected") return status;
+  return "pending";
 }
 
 function getStatusColor(
-  status?: string,
+  status?: string
 ): "default" | "success" | "error" | "warning" {
   if (status === "approved") return "success";
   if (status === "rejected") return "error";
@@ -56,13 +51,17 @@ function getStatusColor(
 }
 
 export function MerchantManager() {
+  const m = useTranslations("MerchantAdmin");
+  const common = useTranslations("Common");
+  const st = useTranslations("Status");
+  const mf = useTranslations("MerchantForm");
   const compactTextFieldSx = { "& .MuiInputBase-root": { fontSize: 14 } };
   const [merchants, setMerchants] = useState<MerchantItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [selectedMerchant, setSelectedMerchant] = useState<MerchantItem | null>(
-    null,
+    null
   );
   const [reviewStatus, setReviewStatus] = useState<ReviewStatus>("approved");
   const [remark, setRemark] = useState("");
@@ -78,10 +77,11 @@ export function MerchantManager() {
     setLoading(false);
 
     if (!result.success) {
-      toast.error(result.message ?? "ไม่สามารถโหลดรายการ Merchant ได้");
+      toast.error(result.message ?? m("loadFailed"));
       return;
     }
     setMerchants(result.data);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the translator is only read on error; a locale switch must not refetch
   }, [search, status]);
 
   useEffect(() => {
@@ -118,10 +118,10 @@ export function MerchantManager() {
     setSubmittingReview(false);
 
     if (!result.success) {
-      toast.error(result.message ?? "ไม่สามารถอัปเดตสถานะ Merchant ได้");
+      toast.error(result.message ?? m("reviewFailed"));
       return;
     }
-    toast.success("อัปเดตสถานะ Merchant สำเร็จ");
+    toast.success(m("reviewSuccess"));
     closeReviewDialog();
     await loadMerchants();
   };
@@ -129,16 +129,16 @@ export function MerchantManager() {
   const handleDelete = async (merchant: MerchantItem) => {
     if (!merchant.uuid) return;
     const isConfirmed = window.confirm(
-      `ยืนยันการลบ Merchant: ${merchant.merchantName}`,
+      m("confirmDelete", { name: merchant.merchantName })
     );
     if (!isConfirmed) return;
 
     const result = await deleteMerchant(merchant.uuid);
     if (!result.success) {
-      toast.error(result.message ?? "ไม่สามารถลบ Merchant ได้");
+      toast.error(result.message ?? m("deleteFailed"));
       return;
     }
-    toast.success("ลบ Merchant สำเร็จ");
+    toast.success(m("deleteSuccess"));
     await loadMerchants();
   };
 
@@ -146,7 +146,7 @@ export function MerchantManager() {
     <Stack spacing={2}>
       <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
         <TextField
-          label="ค้นหา (ชื่อกิจการ/อีเมล)"
+          label={m("searchLabel")}
           size="small"
           margin="dense"
           value={search}
@@ -156,7 +156,7 @@ export function MerchantManager() {
         />
         <TextField
           select
-          label="สถานะ"
+          label={m("statusLabel")}
           size="small"
           margin="dense"
           value={status}
@@ -164,8 +164,8 @@ export function MerchantManager() {
           sx={{ ...compactTextFieldSx, minWidth: { xs: "100%", md: 200 } }}
         >
           {statusOptions.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
+            <MenuItem key={option} value={option}>
+              {option ? st(option) : m("all")}
             </MenuItem>
           ))}
         </TextField>
@@ -174,25 +174,23 @@ export function MerchantManager() {
           onClick={() => void loadMerchants()}
           disabled={loading}
         >
-          {loading ? "กำลังโหลด..." : "รีเฟรช"}
+          {loading ? m("loading") : m("refresh")}
         </Button>
       </Stack>
 
       {merchants.length === 0 && !loading ? (
-        <Alert severity="info">
-          ยังไม่มีข้อมูล Merchant ตามเงื่อนไขที่เลือก
-        </Alert>
+        <Alert severity="info">{m("empty")}</Alert>
       ) : null}
 
       <TableContainer component={Paper} variant="outlined">
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>ชื่อกิจการ</TableCell>
-              <TableCell>ผู้ติดต่อ</TableCell>
-              <TableCell>ประเภท</TableCell>
-              <TableCell>สถานะ</TableCell>
-              <TableCell align="right">จัดการ</TableCell>
+              <TableCell>{m("colName")}</TableCell>
+              <TableCell>{m("colContact")}</TableCell>
+              <TableCell>{m("colType")}</TableCell>
+              <TableCell>{m("colStatus")}</TableCell>
+              <TableCell align="right">{m("colActions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -212,11 +210,15 @@ export function MerchantManager() {
                     {merchant.contactEmail || "-"}
                   </Typography>
                 </TableCell>
-                <TableCell>{merchant.merchantType || "-"}</TableCell>
+                <TableCell>
+                  {merchant.merchantType && mf.has(`merchantType.${merchant.merchantType}`)
+                    ? mf(`merchantType.${merchant.merchantType}`)
+                    : merchant.merchantType || "-"}
+                </TableCell>
                 <TableCell>
                   <Chip
                     size="small"
-                    label={getStatusLabel(merchant.status)}
+                    label={st(getStatusKey(merchant.status))}
                     color={getStatusColor(merchant.status)}
                   />
                 </TableCell>
@@ -226,14 +228,14 @@ export function MerchantManager() {
                       size="small"
                       onClick={() => openReviewDialog(merchant)}
                     >
-                      รีวิว
+                      {m("review")}
                     </Button>
                     <Button
                       size="small"
                       color="error"
                       onClick={() => void handleDelete(merchant)}
                     >
-                      ลบ
+                      {common("delete")}
                     </Button>
                   </Stack>
                 </TableCell>
@@ -249,7 +251,7 @@ export function MerchantManager() {
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>รีวิว Merchant</DialogTitle>
+        <DialogTitle>{m("reviewTitle")}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <Box>
@@ -263,7 +265,7 @@ export function MerchantManager() {
             {details?.licenseAnalysisSnapshot?.result?.recommendedLicenses ? (
               <Box>
                 <Typography fontWeight={700} sx={{ mb: 1 }}>
-                  ใบอนุญาตที่ระบบวิเคราะห์ไว้
+                  {m("analyzedLicenses")}
                 </Typography>
                 <LicenseRecommendations
                   licenses={
@@ -274,7 +276,7 @@ export function MerchantManager() {
             ) : null}
             <TextField
               select
-              label="ผลการพิจารณา"
+              label={m("decision")}
               size="small"
               margin="dense"
               value={reviewStatus}
@@ -284,11 +286,11 @@ export function MerchantManager() {
               fullWidth
               sx={compactTextFieldSx}
             >
-              <MenuItem value="approved">อนุมัติ</MenuItem>
-              <MenuItem value="rejected">ไม่อนุมัติ</MenuItem>
+              <MenuItem value="approved">{m("approve")}</MenuItem>
+              <MenuItem value="rejected">{m("reject")}</MenuItem>
             </TextField>
             <TextField
-              label="หมายเหตุ (ถ้ามี)"
+              label={common("optionalNote")}
               size="small"
               margin="dense"
               value={remark}
@@ -302,14 +304,14 @@ export function MerchantManager() {
         </DialogContent>
         <DialogActions>
           <Button onClick={closeReviewDialog} disabled={submittingReview}>
-            ยกเลิก
+            {common("cancel")}
           </Button>
           <Button
             onClick={() => void handleReview()}
             variant="contained"
             disabled={submittingReview}
           >
-            {submittingReview ? "กำลังบันทึก..." : "บันทึกผลรีวิว"}
+            {submittingReview ? m("savingReview") : m("saveReview")}
           </Button>
         </DialogActions>
       </Dialog>

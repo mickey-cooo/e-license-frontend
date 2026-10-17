@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import { Box, Button, Grid, Stack, TextField, Typography } from "@mui/material";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { useRole } from "@/lib/helper/use-is-admin";
 import {
@@ -27,20 +28,12 @@ const empty = {
 
 type Values = typeof empty;
 
-const fields: { key: keyof Values; label: string; md: number }[] = [
-  { key: "nameTh", label: "ชื่อ (ไทย)", md: 6 },
-  { key: "nameEn", label: "ชื่อ (อังกฤษ)", md: 6 },
-  { key: "lastNameTh", label: "นามสกุล (ไทย)", md: 6 },
-  { key: "lastNameEn", label: "นามสกุล (อังกฤษ)", md: 6 },
-  { key: "phoneNumber", label: "เบอร์โทรศัพท์", md: 6 },
-  { key: "province", label: "จังหวัด", md: 6 },
-  { key: "district", label: "อำเภอ/เขต", md: 6 },
-  { key: "subDistrict", label: "ตำบล/แขวง", md: 6 },
-  { key: "postalCode", label: "รหัสไปรษณีย์", md: 6 },
-  { key: "detail", label: "ที่อยู่เพิ่มเติม", md: 6 },
-];
+// each field's label is the Person message with the same key
+const fields = Object.keys(empty) as (keyof Values)[];
 
 export function ProfileForm() {
+  const p = useTranslations("Profile");
+  const person = useTranslations("Person");
   const { userId, ready } = useRole();
   const [email, setEmail] = useState("");
   const [values, setValues] = useState<Values>(empty);
@@ -52,7 +45,7 @@ export function ProfileForm() {
     void getUser(userId).then((result) => {
       if (!active) return;
       if (!result.success || !result.data) {
-        toast.error(result.success ? "ไม่พบข้อมูลผู้ใช้" : result.message);
+        toast.error(result.success ? p("userNotFound") : result.message);
         return;
       }
       const user = result.data;
@@ -73,15 +66,21 @@ export function ProfileForm() {
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the translator is only read on error; a locale switch must not refetch
   }, [userId]);
 
   const onSave = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!userId) return;
-    const addressParts = [values.province, values.district, values.subDistrict, values.postalCode];
+    const addressParts = [
+      values.province,
+      values.district,
+      values.subDistrict,
+      values.postalCode,
+    ];
     const hasAddress = addressParts.some(Boolean) || Boolean(values.detail);
     if (hasAddress && !addressParts.every(Boolean)) {
-      toast.error("กรุณากรอกจังหวัด อำเภอ ตำบล และรหัสไปรษณีย์ให้ครบ");
+      toast.error(p("addressIncomplete"));
       return;
     }
     const body: UpdateUserBody = {
@@ -105,35 +104,35 @@ export function ProfileForm() {
       toast.error(result.message);
       return;
     }
-    toast.success("บันทึกโปรไฟล์สำเร็จ");
+    toast.success(p("saved"));
   };
 
   const onDelete = async () => {
     if (!userId) return;
-    if (!window.confirm("ยืนยันการลบบัญชีของคุณ การลบไม่สามารถย้อนกลับได้")) return;
+    if (!window.confirm(p("confirmDelete"))) return;
     const result = await deleteUser(userId);
     if (!result.success) {
       toast.error(result.message);
       return;
     }
-    toast.success("ลบบัญชีแล้ว");
+    toast.success(p("deleted"));
     await signOut({ callbackUrl: "/login" });
   };
 
   if (ready && !userId) {
-    return <Typography>กรุณาเข้าสู่ระบบใหม่</Typography>;
+    return <Typography>{p("loginAgain")}</Typography>;
   }
 
   return (
     <Box component="form" onSubmit={onSave}>
       <Typography sx={{ mb: 2 }} color="text.secondary">
-        อีเมล: {email || "-"}
+        {p("email", { email: email || "-" })}
       </Typography>
       <Grid container spacing={2}>
-        {fields.map(({ key, label, md }) => (
-          <Grid key={key} size={{ xs: 12, md }}>
+        {fields.map((key) => (
+          <Grid key={key} size={{ xs: 12, md: 6 }}>
             <TextField
-              label={label}
+              label={person(key)}
               value={values[key]}
               onChange={(event) =>
                 setValues((prev) => ({ ...prev, [key]: event.target.value }))
@@ -145,10 +144,14 @@ export function ProfileForm() {
       </Grid>
       <Stack direction="row" spacing={1.5} sx={{ mt: 3 }}>
         <Button type="submit" variant="contained" disabled={saving}>
-          {saving ? "กำลังบันทึก..." : "บันทึกโปรไฟล์"}
+          {saving ? p("saving") : p("save")}
         </Button>
-        <Button color="error" variant="outlined" onClick={() => void onDelete()}>
-          ลบบัญชี
+        <Button
+          color="error"
+          variant="outlined"
+          onClick={() => void onDelete()}
+        >
+          {p("deleteAccount")}
         </Button>
       </Stack>
     </Box>

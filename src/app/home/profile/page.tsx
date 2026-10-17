@@ -1,15 +1,17 @@
 import { Box, Container } from "@mui/material";
 import { ProfileForm } from "../profile-form";
+import { getTranslations } from "next-intl/server";
 import { SectionShell } from "../section-shell";
 import styles from "../page.module.scss";
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const t = await getTranslations("Profile");
   return (
     <Box component="main" className={styles.page}>
       <Container className={styles.container} disableGutters>
         <SectionShell
-          title="โปรไฟล์ของฉัน"
-          description="ตรวจสอบและแก้ไขข้อมูลส่วนตัวที่ใช้ในการยื่นคำขอ"
+          title={t("pageTitle")}
+          description={t("pageDesc")}
         >
           <ProfileForm />
         </SectionShell>

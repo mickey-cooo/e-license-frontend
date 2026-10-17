@@ -21,6 +21,8 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useFormatter, useTranslations } from "next-intl";
+import { fieldError } from "@/lib/helper/field-error";
 import { toast } from "react-toastify";
 import { trackerSchema, type TrackerSchema } from "@/schema/document.schema";
 import { getMerchants, type MerchantItem } from "@/service/merchant.service";
@@ -38,26 +40,12 @@ import {
 import { useRole } from "@/lib/helper/use-is-admin";
 import { useDocumentSocket } from "@/lib/helper/use-document-socket";
 
-const statusText: Record<string, string> = {
-  submitted: "ส่งแล้ว",
-  forwarded_to_admin: "ส่งต่อผู้ดูแล",
-  in_review: "กำลังตรวจสอบ",
-  approved: "อนุมัติแล้ว",
-  rejected: "ไม่อนุมัติ",
-  deleted: "ลบแล้ว",
-};
-
 // Mirrors the backend transition table (approved and rejected are final).
 const nextStatuses: Record<string, string[]> = {
   submitted: ["rejected"],
   forwarded_to_admin: ["in_review", "rejected"],
   in_review: ["approved", "rejected"],
 };
-
-function statusLabel(status?: string) {
-  if (!status) return "ส่งแล้ว";
-  return statusText[status] ?? status.replace(/_/g, " ");
-}
 
 function statusColor(status?: string): "default" | "success" | "error" {
   const normalized = status?.toUpperCase();
@@ -74,9 +62,25 @@ type Dialogs =
   | null;
 
 export function DocumentTracker() {
+  const tr = useTranslations("Tracker");
+  const common = useTranslations("Common");
+  const st = useTranslations("Status");
+  const format = useFormatter();
+  const v = useTranslations("Validation");
+  const statusLabel = (status?: string) =>
+    !status
+      ? st("submitted")
+      : st.has(status)
+      ? st(status)
+      : status.replace(/_/g, " ");
   const { isAdmin } = useRole();
   const [dialog, setDialog] = useState<Dialogs>(null);
-  const [draft, setDraft] = useState({ title: "", documentType: "", fileUrl: "", description: "" });
+  const [draft, setDraft] = useState({
+    title: "",
+    documentType: "",
+    fileUrl: "",
+    description: "",
+  });
   const [note, setNote] = useState("");
   const [nextStatus, setNextStatus] = useState("");
   const [busy, setBusy] = useState(false);
@@ -108,7 +112,7 @@ export function DocumentTracker() {
       setLoadingMerchants(false);
 
       if (!result.success) {
-        toast.error(result.message ?? "ไม่สามารถโหลดรายการผู้ประกอบการได้");
+        toast.error(result.message ?? tr("loadMerchantsFailed"));
         return;
       }
       setMerchants(result.data);
@@ -118,15 +122,16 @@ export function DocumentTracker() {
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the translator is only read on error; a locale switch must not refetch
   }, []);
 
   const merchantOptions = useMemo(
     () =>
       merchants.filter(
         (merchant): merchant is MerchantItem & { uuid: string } =>
-          Boolean(merchant.uuid),
+          Boolean(merchant.uuid)
       ),
-    [merchants],
+    [merchants]
   );
 
   const getMerchantLabel = (merchant: MerchantItem) => {
@@ -146,7 +151,7 @@ export function DocumentTracker() {
     setIsSearching(false);
 
     if (!result.success) {
-      toast.error(result.message ?? "ไม่สามารถดึงข้อมูลเอกสารได้");
+      toast.error(result.message ?? tr("loadFailed"));
       return;
     }
     setDocuments(result.data);
@@ -155,7 +160,7 @@ export function DocumentTracker() {
   const reload = useCallback(
     () => onSearch(getValues()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    []
   );
 
   useEffect(() => {
@@ -165,7 +170,7 @@ export function DocumentTracker() {
 
   // the backend pushes a progress event whenever a document changes state
   useDocumentSocket(() => {
-    toast.info("สถานะเอกสารมีการอัปเดต");
+    toast.info(tr("updated"));
     void reload();
   });
 
@@ -175,13 +180,13 @@ export function DocumentTracker() {
 
   const run = async (
     action: () => Promise<{ success: boolean; message?: string }>,
-    done: string,
+    done: string
   ) => {
     setBusy(true);
     const result = await action();
     setBusy(false);
     if (!result.success) {
-      toast.error(result.message ?? "ดำเนินการไม่สำเร็จ");
+      toast.error(result.message ?? common("actionFailed"));
       return;
     }
     toast.success(done);
@@ -196,7 +201,7 @@ export function DocumentTracker() {
       getDocumentProgress(doc.uuid),
     ]);
     if (!progress.success) {
-      toast.error(progress.message ?? "ไม่สามารถโหลดความคืบหน้าได้");
+      toast.error(progress.message ?? tr("progressFailed"));
       return;
     }
     setDialog({
@@ -224,8 +229,8 @@ export function DocumentTracker() {
 
   const onDelete = async (doc: DocumentItem) => {
     if (!doc.uuid) return;
-    if (!window.confirm(`ยืนยันการลบเอกสาร: ${doc.title}`)) return;
-    await run(() => deleteDocument(doc.uuid!), "ลบเอกสารสำเร็จ");
+    if (!window.confirm(tr("confirmDelete", { title: doc.title }))) return;
+    await run(() => deleteDocument(doc.uuid!), tr("deleteSuccess"));
   };
 
   return (
@@ -243,7 +248,7 @@ export function DocumentTracker() {
                   loading={loadingMerchants}
                   value={
                     merchantOptions.find(
-                      (merchant) => merchant.uuid === field.value,
+                      (merchant) => merchant.uuid === field.value
                     ) ?? null
                   }
                   onChange={(_, value) => field.onChange(value?.uuid ?? "")}
@@ -254,12 +259,11 @@ export function DocumentTracker() {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="ค้นหาด้วยชื่อผู้ประกอบการ"
+                      label={tr("merchantSearch")}
                       fullWidth
                       error={Boolean(errors.merchantUuid)}
                       helperText={
-                        errors.merchantUuid?.message ??
-                        "เลือกชื่อกิจการ ระบบจะค้นหาให้อัตโนมัติ"
+                        fieldError(v, errors.merchantUuid) ?? tr("merchantHelper")
                       }
                       slotProps={{
                         input: {
@@ -282,7 +286,7 @@ export function DocumentTracker() {
           </Grid>
           <Grid size={{ xs: 12, md: 5 }}>
             <TextField
-              label="ประเภทเอกสาร"
+              label={tr("documentType")}
               fullWidth
               {...register("documentType")}
             />
@@ -295,7 +299,7 @@ export function DocumentTracker() {
               disabled={isSearching}
               sx={{ height: "56px", borderRadius: 1 }}
             >
-              {isSearching ? "ค้นหา..." : "ค้นหา"}
+              {isSearching ? tr("searching") : common("search")}
             </Button>
           </Grid>
         </Grid>
@@ -307,9 +311,7 @@ export function DocumentTracker() {
             variant="outlined"
             sx={{ p: 2.5, borderRadius: 1, textAlign: "center" }}
           >
-            <Typography color="text.secondary">
-              ยังไม่พบเอกสาร ลองค้นหาด้วยชื่อผู้ประกอบการ หรือประเภทเอกสาร
-            </Typography>
+            <Typography color="text.secondary">{tr("empty")}</Typography>
           </Paper>
         ) : (
           documents.map((doc) => (
@@ -326,7 +328,7 @@ export function DocumentTracker() {
                 <Box>
                   <Typography fontWeight={700}>{doc.title}</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    ประเภท: {doc.documentType}
+                    {tr("typeLabel", { type: doc.documentType })}
                   </Typography>
                   {doc.description ? (
                     <Typography variant="body2" sx={{ mt: 0.5 }}>
@@ -341,30 +343,46 @@ export function DocumentTracker() {
                     size="small"
                   />
                   <Link href={doc.fileUrl} target="_blank" rel="noreferrer">
-                    เปิดเอกสาร
+                    {tr("openDocument")}
                   </Link>
                 </Stack>
               </Stack>
-              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }}>
+              <Stack
+                direction="row"
+                spacing={1}
+                useFlexGap
+                flexWrap="wrap"
+                sx={{ mt: 1.5 }}
+              >
                 <Button size="small" onClick={() => void openProgress(doc)}>
-                  ความคืบหน้า
+                  {tr("progress")}
                 </Button>
                 {doc.status === "submitted" ? (
                   <Button size="small" onClick={() => openEdit(doc)}>
-                    แก้ไข
+                    {common("edit")}
                   </Button>
                 ) : null}
-                <Button size="small" color="error" onClick={() => void onDelete(doc)}>
-                  ลบ
+                <Button
+                  size="small"
+                  color="error"
+                  onClick={() => void onDelete(doc)}
+                >
+                  {common("delete")}
                 </Button>
                 {isAdmin && doc.status === "submitted" ? (
-                  <Button size="small" onClick={() => openNoteDialog("forward", doc)}>
-                    ส่งต่อผู้ดูแล
+                  <Button
+                    size="small"
+                    onClick={() => openNoteDialog("forward", doc)}
+                  >
+                    {tr("forward")}
                   </Button>
                 ) : null}
                 {isAdmin && nextStatuses[doc.status ?? ""] ? (
-                  <Button size="small" onClick={() => openNoteDialog("status", doc)}>
-                    เปลี่ยนสถานะ
+                  <Button
+                    size="small"
+                    onClick={() => openNoteDialog("status", doc)}
+                  >
+                    {tr("changeStatus")}
                   </Button>
                 ) : null}
               </Stack>
@@ -373,23 +391,49 @@ export function DocumentTracker() {
         )}
       </Stack>
 
-      <Dialog open={dialog?.kind === "progress"} onClose={closeDialog} fullWidth maxWidth="sm">
-        <DialogTitle>ความคืบหน้า: {dialog?.doc.title}</DialogTitle>
+      <Dialog
+        open={dialog?.kind === "progress"}
+        onClose={closeDialog}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>
+          {tr("progressTitle", { title: dialog?.doc.title ?? "" })}
+        </DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-            สถานะปัจจุบัน: {statusLabel(dialog?.doc.status)}
+            {tr("currentStatus", { status: statusLabel(dialog?.doc.status) })}
           </Typography>
-          <Stack component="ol" spacing={1} sx={{ m: 0, p: 0, listStyle: "none" }}>
+          <Stack
+            component="ol"
+            spacing={1}
+            sx={{ m: 0, p: 0, listStyle: "none" }}
+          >
             {dialog?.kind === "progress" && dialog.steps.length === 0 ? (
-              <Typography color="text.secondary">ยังไม่มีประวัติ</Typography>
+              <Typography color="text.secondary">{tr("noHistory")}</Typography>
             ) : null}
             {dialog?.kind === "progress"
               ? dialog.steps.map((step, index) => (
-                  <Box component="li" key={step.uuid ?? index} sx={{ borderBottom: "1px solid", borderColor: "divider", pb: 1 }}>
-                    <Typography fontWeight={700}>{statusLabel(step.status)}</Typography>
+                  <Box
+                    component="li"
+                    key={step.uuid ?? index}
+                    sx={{
+                      borderBottom: "1px solid",
+                      borderColor: "divider",
+                      pb: 1,
+                    }}
+                  >
+                    <Typography fontWeight={700}>
+                      {statusLabel(step.status)}
+                    </Typography>
                     <Typography variant="body2">{step.note}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {step.createdAt ? new Date(step.createdAt).toLocaleString("th-TH") : ""}
+                      {step.createdAt
+                        ? format.dateTime(new Date(step.createdAt), {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })
+                        : ""}
                     </Typography>
                   </Box>
                 ))
@@ -397,51 +441,122 @@ export function DocumentTracker() {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeDialog}>ปิด</Button>
+          <Button onClick={closeDialog}>{common("close")}</Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={dialog?.kind === "edit"} onClose={closeDialog} fullWidth maxWidth="sm">
-        <DialogTitle>แก้ไขเอกสาร</DialogTitle>
+      <Dialog
+        open={dialog?.kind === "edit"}
+        onClose={closeDialog}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>{tr("editTitle")}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField label="ชื่อเอกสาร" value={draft.title} onChange={(event) => setDraft((prev) => ({ ...prev, title: event.target.value }))} fullWidth />
-            <TextField label="ประเภทเอกสาร" value={draft.documentType} onChange={(event) => setDraft((prev) => ({ ...prev, documentType: event.target.value }))} fullWidth />
-            <TextField label="URL เอกสาร (https)" value={draft.fileUrl} onChange={(event) => setDraft((prev) => ({ ...prev, fileUrl: event.target.value }))} fullWidth />
-            <TextField label="รายละเอียด" value={draft.description} onChange={(event) => setDraft((prev) => ({ ...prev, description: event.target.value }))} multiline minRows={2} fullWidth />
+            <TextField
+              label={tr("fieldTitle")}
+              value={draft.title}
+              onChange={(event) =>
+                setDraft((prev) => ({ ...prev, title: event.target.value }))
+              }
+              fullWidth
+            />
+            <TextField
+              label={tr("documentType")}
+              value={draft.documentType}
+              onChange={(event) =>
+                setDraft((prev) => ({
+                  ...prev,
+                  documentType: event.target.value,
+                }))
+              }
+              fullWidth
+            />
+            <TextField
+              label={tr("fieldUrl")}
+              value={draft.fileUrl}
+              onChange={(event) =>
+                setDraft((prev) => ({ ...prev, fileUrl: event.target.value }))
+              }
+              fullWidth
+            />
+            <TextField
+              label={tr("fieldDescription")}
+              value={draft.description}
+              onChange={(event) =>
+                setDraft((prev) => ({
+                  ...prev,
+                  description: event.target.value,
+                }))
+              }
+              multiline
+              minRows={2}
+              fullWidth
+            />
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeDialog} disabled={busy}>ยกเลิก</Button>
+          <Button onClick={closeDialog} disabled={busy}>
+            {common("cancel")}
+          </Button>
           <Button
             variant="contained"
             disabled={busy}
             onClick={() =>
               dialog?.doc.uuid &&
-              void run(() => updateDocument(dialog.doc.uuid!, draft), "แก้ไขเอกสารสำเร็จ")
+              void run(
+                () => updateDocument(dialog.doc.uuid!, draft),
+                tr("editSuccess")
+              )
             }
           >
-            บันทึก
+            {common("save")}
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={dialog?.kind === "forward" || dialog?.kind === "status"} onClose={closeDialog} fullWidth maxWidth="sm">
-        <DialogTitle>{dialog?.kind === "forward" ? "ส่งต่อผู้ดูแล" : "เปลี่ยนสถานะ"}: {dialog?.doc.title}</DialogTitle>
+      <Dialog
+        open={dialog?.kind === "forward" || dialog?.kind === "status"}
+        onClose={closeDialog}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>
+          {dialog?.kind === "forward" ? tr("forward") : tr("changeStatus")}:{" "}
+          {dialog?.doc.title}
+        </DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             {dialog?.kind === "status" ? (
-              <TextField select label="สถานะใหม่" value={nextStatus} onChange={(event) => setNextStatus(event.target.value)} fullWidth>
+              <TextField
+                select
+                label={tr("newStatus")}
+                value={nextStatus}
+                onChange={(event) => setNextStatus(event.target.value)}
+                fullWidth
+              >
                 {(nextStatuses[dialog.doc.status ?? ""] ?? []).map((status) => (
-                  <MenuItem key={status} value={status}>{statusLabel(status)}</MenuItem>
+                  <MenuItem key={status} value={status}>
+                    {statusLabel(status)}
+                  </MenuItem>
                 ))}
               </TextField>
             ) : null}
-            <TextField label="หมายเหตุ (ถ้ามี)" value={note} onChange={(event) => setNote(event.target.value)} multiline minRows={2} fullWidth />
+            <TextField
+              label={common("optionalNote")}
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              multiline
+              minRows={2}
+              fullWidth
+            />
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeDialog} disabled={busy}>ยกเลิก</Button>
+          <Button onClick={closeDialog} disabled={busy}>
+            {common("cancel")}
+          </Button>
           <Button
             variant="contained"
             disabled={busy || (dialog?.kind === "status" && !nextStatus)}
@@ -449,13 +564,23 @@ export function DocumentTracker() {
               const target = dialog?.doc.uuid;
               if (!target) return;
               if (dialog.kind === "forward") {
-                void run(() => forwardDocument(target, note || undefined), "ส่งต่อเอกสารสำเร็จ");
+                void run(
+                  () => forwardDocument(target, note || undefined),
+                  tr("forwardSuccess")
+                );
               } else {
-                void run(() => updateDocumentStatus(target, { status: nextStatus, note: note || undefined }), "เปลี่ยนสถานะสำเร็จ");
+                void run(
+                  () =>
+                    updateDocumentStatus(target, {
+                      status: nextStatus,
+                      note: note || undefined,
+                    }),
+                  tr("statusSuccess")
+                );
               }
             }}
           >
-            ยืนยัน
+            {common("confirm")}
           </Button>
         </DialogActions>
       </Dialog>

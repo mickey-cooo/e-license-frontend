@@ -18,6 +18,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import {
   createUser,
@@ -29,19 +30,24 @@ import {
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const blank = {
-  nameTh: "", nameEn: "", lastNameTh: "", lastNameEn: "", phoneNumber: "",
-  province: "", district: "", subDistrict: "", postalCode: "", detail: "",
+  nameTh: "",
+  nameEn: "",
+  lastNameTh: "",
+  lastNameEn: "",
+  phoneNumber: "",
+  province: "",
+  district: "",
+  subDistrict: "",
+  postalCode: "",
+  detail: "",
 };
 
-const createFields: [keyof typeof blank, string][] = [
-  ["nameTh", "ชื่อ (ไทย)"], ["nameEn", "ชื่อ (อังกฤษ)"],
-  ["lastNameTh", "นามสกุล (ไทย)"], ["lastNameEn", "นามสกุล (อังกฤษ)"],
-  ["phoneNumber", "เบอร์โทรศัพท์"], ["province", "จังหวัด"],
-  ["district", "อำเภอ/เขต"], ["subDistrict", "ตำบล/แขวง"],
-  ["postalCode", "รหัสไปรษณีย์"], ["detail", "ที่อยู่เพิ่มเติม"],
-];
+const createFields = Object.keys(blank) as (keyof typeof blank)[];
 
 export function UserManager() {
+  const u = useTranslations("Users");
+  const person = useTranslations("Person");
+  const common = useTranslations("Common");
   const [idsText, setIdsText] = useState("");
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,7 +57,7 @@ export function UserManager() {
   const onLookup = async () => {
     const ids = idsText.split(/[\s,]+/).filter(Boolean);
     if (ids.length === 0 || ids.some((id) => !UUID.test(id))) {
-      toast.error("กรอก UUID ของผู้ใช้ให้ถูกต้อง (คั่นด้วยเว้นวรรคหรือจุลภาค)");
+      toast.error(u("invalidIds"));
       return;
     }
     setLoading(true);
@@ -65,13 +71,13 @@ export function UserManager() {
   };
 
   const onDelete = async (user: UserItem) => {
-    if (!window.confirm(`ยืนยันการลบผู้ใช้: ${user.email}`)) return;
+    if (!window.confirm(u("confirmDelete", { email: user.email }))) return;
     const result = await deleteUser(user.uuid);
     if (!result.success) {
       toast.error(result.message);
       return;
     }
-    toast.success("ลบผู้ใช้สำเร็จ");
+    toast.success(u("deleted"));
     setUsers((prev) => prev.filter((item) => item.uuid !== user.uuid));
   };
 
@@ -92,28 +98,30 @@ export function UserManager() {
       toast.error(result.message);
       return;
     }
-    toast.success("สร้างผู้ใช้สำเร็จ");
+    toast.success(u("created"));
     setCreating(false);
     setForm(blank);
   };
 
   return (
     <Stack spacing={2}>
-      <Alert severity="info">
-        ระบบค้นหาผู้ใช้ด้วย UUID เท่านั้น (ไม่มีรายการผู้ใช้ทั้งหมด)
-      </Alert>
+      <Alert severity="info">{u("lookupOnly")}</Alert>
       <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
         <TextField
-          label="UUID ผู้ใช้ (หลายรายการได้)"
+          label={u("idsLabel")}
           value={idsText}
           onChange={(event) => setIdsText(event.target.value)}
           fullWidth
         />
-        <Button variant="contained" onClick={() => void onLookup()} disabled={loading}>
-          {loading ? "กำลังค้นหา..." : "ค้นหา"}
+        <Button
+          variant="contained"
+          onClick={() => void onLookup()}
+          disabled={loading}
+        >
+          {loading ? u("searching") : common("search")}
         </Button>
         <Button variant="outlined" onClick={() => setCreating(true)}>
-          สร้างผู้ใช้
+          {u("create")}
         </Button>
       </Stack>
 
@@ -121,10 +129,10 @@ export function UserManager() {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>อีเมล</TableCell>
-              <TableCell>ชื่อ</TableCell>
-              <TableCell>เบอร์โทร</TableCell>
-              <TableCell align="right">จัดการ</TableCell>
+              <TableCell>{u("colEmail")}</TableCell>
+              <TableCell>{u("colName")}</TableCell>
+              <TableCell>{u("colPhone")}</TableCell>
+              <TableCell align="right">{u("colActions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -137,12 +145,18 @@ export function UserManager() {
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  {user.name ? `${user.name.th} ${user.lastName?.th ?? ""}` : "-"}
+                  {user.name
+                    ? `${user.name.th} ${user.lastName?.th ?? ""}`
+                    : "-"}
                 </TableCell>
                 <TableCell>{user.phoneNumber ?? "-"}</TableCell>
                 <TableCell align="right">
-                  <Button size="small" color="error" onClick={() => void onDelete(user)}>
-                    ลบ
+                  <Button
+                    size="small"
+                    color="error"
+                    onClick={() => void onDelete(user)}
+                  >
+                    {common("delete")}
                   </Button>
                 </TableCell>
               </TableRow>
@@ -151,14 +165,19 @@ export function UserManager() {
         </Table>
       ) : null}
 
-      <Dialog open={creating} onClose={() => setCreating(false)} fullWidth maxWidth="sm">
-        <DialogTitle>สร้างผู้ใช้</DialogTitle>
+      <Dialog
+        open={creating}
+        onClose={() => setCreating(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>{u("create")}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
-            {createFields.map(([key, label]) => (
+            {createFields.map((key) => (
               <Grid key={key} size={{ xs: 12, md: 6 }}>
                 <TextField
-                  label={label}
+                  label={person(key)}
                   value={form[key]}
                   onChange={(event) =>
                     setForm((prev) => ({ ...prev, [key]: event.target.value }))
@@ -170,9 +189,9 @@ export function UserManager() {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreating(false)}>ยกเลิก</Button>
+          <Button onClick={() => setCreating(false)}>{common("cancel")}</Button>
           <Button variant="contained" onClick={() => void onCreate()}>
-            สร้าง
+            {u("createConfirm")}
           </Button>
         </DialogActions>
       </Dialog>

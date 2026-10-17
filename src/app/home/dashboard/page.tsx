@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Box, Container, Stack } from "@mui/material";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { Stamp } from "../../components/stamp";
 import { SectionShell } from "../section-shell";
@@ -11,21 +12,14 @@ import styles from "../page.module.scss";
 import ledger from "./dashboard.module.scss";
 
 const documentStatuses = [
-  ["submitted", "ส่งแล้ว"],
-  ["forwarded_to_admin", "ส่งต่อผู้ดูแล"],
-  ["in_review", "กำลังตรวจสอบ"],
-  ["approved", "อนุมัติแล้ว"],
-  ["rejected", "ไม่อนุมัติ"],
+  "submitted",
+  "forwarded_to_admin",
+  "in_review",
+  "approved",
+  "rejected",
 ] as const;
 
-const merchantStatuses = [
-  ["pending", "รอดำเนินการ"],
-  ["approved", "อนุมัติแล้ว"],
-  ["rejected", "ไม่อนุมัติ"],
-] as const;
-
-const labelOf = (list: readonly (readonly [string, string])[], status?: string) =>
-  list.find(([value]) => value === status)?.[1] ?? status ?? "-";
+const merchantStatuses = ["pending", "approved", "rejected"] as const;
 
 function statusTone(status?: string) {
   if (status === "approved") return "blue";
@@ -34,6 +28,8 @@ function statusTone(status?: string) {
 }
 
 export default function DashboardPage() {
+  const d = useTranslations("Dashboard");
+  const st = useTranslations("Status");
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [documentTotal, setDocumentTotal] = useState(0);
   const [merchants, setMerchants] = useState<MerchantItem[]>([]);
@@ -50,7 +46,7 @@ export default function DashboardPage() {
         }
         if (!shops.success) toast.error(shops.message);
         else setMerchants(shops.data);
-      },
+      }
     );
     return () => {
       active = false;
@@ -64,18 +60,15 @@ export default function DashboardPage() {
     <Box component="main" className={styles.page}>
       <Container className={styles.container} disableGutters>
         <Stack spacing={3}>
-          <SectionShell
-            title="Dashboard ติดตามสถานะ"
-            description="สรุปสถานะเอกสารและผู้ประกอบการของคุณจากข้อมูลในระบบ"
-          >
+          <SectionShell title={d("title")} description={d("desc")}>
             <table className={ledger.table}>
               <caption className={ledger.caption}>
-                เอกสารทั้งหมด {documentTotal} รายการ
+                {d("documentsTotal", { count: documentTotal })}
               </caption>
               <tbody>
-                {documentStatuses.map(([value, label]) => (
+                {documentStatuses.map((value) => (
                   <tr key={value}>
-                    <th scope="row">{label}</th>
+                    <th scope="row">{st(value)}</th>
                     <td>{count(documents, value)}</td>
                   </tr>
                 ))}
@@ -84,12 +77,12 @@ export default function DashboardPage() {
 
             <table className={ledger.table}>
               <caption className={ledger.caption}>
-                ผู้ประกอบการ {merchants.length} ราย
+                {d("merchantsTotal", { count: merchants.length })}
               </caption>
               <tbody>
-                {merchantStatuses.map(([value, label]) => (
+                {merchantStatuses.map((value) => (
                   <tr key={value}>
-                    <th scope="row">{label}</th>
+                    <th scope="row">{st(value)}</th>
                     <td>{count(merchants, value)}</td>
                   </tr>
                 ))}
@@ -97,20 +90,17 @@ export default function DashboardPage() {
             </table>
           </SectionShell>
 
-          <SectionShell
-            title="เอกสารล่าสุด"
-            description="รายการเอกสารที่ส่งล่าสุดและสถานะปัจจุบัน"
-          >
+          <SectionShell title={d("latestTitle")} description={d("latestDesc")}>
             {documents.length === 0 ? (
-              <p>ยังไม่มีเอกสารในระบบ</p>
+              <p>{d("none")}</p>
             ) : (
               <div className={ledger.scroll}>
                 <table className={ledger.table}>
                   <thead>
                     <tr>
-                      <th scope="col">ชื่อเอกสาร</th>
-                      <th scope="col">ประเภท</th>
-                      <th scope="col">สถานะ</th>
+                      <th scope="col">{d("colTitle")}</th>
+                      <th scope="col">{d("colType")}</th>
+                      <th scope="col">{d("colStatus")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -120,7 +110,11 @@ export default function DashboardPage() {
                         <td>{doc.documentType}</td>
                         <td>
                           <Stamp
-                            label={labelOf(documentStatuses, doc.status)}
+                            label={
+                              doc.status && st.has(doc.status)
+                                ? st(doc.status)
+                                : doc.status ?? "-"
+                            }
                             tone={statusTone(doc.status)}
                             tilt={-2}
                             plain

@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { useTranslations } from "next-intl";
 import type { LicenseRecommendation } from "@/service/license-advisory.service";
 
 export function LicenseRecommendations({
@@ -6,8 +7,9 @@ export function LicenseRecommendations({
 }: {
   licenses: LicenseRecommendation[];
 }) {
+  const t = useTranslations("Common");
   if (licenses.length === 0) {
-    return <Typography color="text.secondary">ไม่พบใบอนุญาตที่ต้องใช้</Typography>;
+    return <Typography color="text.secondary">{t("noLicenses")}</Typography>;
   }
   return (
     <Box component="ul" sx={{ m: 0, p: 0, listStyle: "none", border: "1px solid", borderBottom: 0 }}>

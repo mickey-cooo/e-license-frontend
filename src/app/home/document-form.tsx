@@ -11,12 +11,16 @@ import {
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
+import { fieldError } from "@/lib/helper/field-error";
 import { documentSchema, type DocumentSchema } from "@/schema/document.schema";
 import { createDocument } from "@/service/document.service";
 import { getMerchants, type MerchantItem } from "@/service/merchant.service";
 
 export function DocumentForm() {
+  const d = useTranslations("Document");
+  const v = useTranslations("Validation");
   const compactTextFieldSx = { "& .MuiInputBase-root": { fontSize: 14 } };
   const [merchants, setMerchants] = useState<MerchantItem[]>([]);
   const [loadingMerchants, setLoadingMerchants] = useState(false);
@@ -47,7 +51,7 @@ export function DocumentForm() {
       setLoadingMerchants(false);
 
       if (!result.success) {
-        toast.error(result.message ?? "ไม่สามารถโหลดรายการ Merchant ได้");
+        toast.error(result.message ?? d("loadMerchantsFailed"));
         return;
       }
       setMerchants(result.data);
@@ -57,6 +61,7 @@ export function DocumentForm() {
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the translator is only read on error; a locale switch must not refetch
   }, []);
 
   const merchantOptions = useMemo(
@@ -79,11 +84,11 @@ export function DocumentForm() {
   const onSubmit = async (values: DocumentSchema) => {
     const result = await createDocument(values);
     if (result.success) {
-      toast.success("ส่งเอกสารสำเร็จ");
+      toast.success(d("submitSuccess"));
       reset();
       return;
     }
-    toast.error(result.message ?? "ไม่สามารถส่งเอกสารได้");
+    toast.error(result.message ?? d("submitFailed"));
   };
 
   return (
@@ -91,37 +96,37 @@ export function DocumentForm() {
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            label="ชื่อเอกสาร"
+            label={d("title")}
             size="small"
             margin="dense"
             fullWidth
             sx={compactTextFieldSx}
             error={Boolean(errors.title)}
-            helperText={errors.title?.message}
+            helperText={fieldError(v, errors.title)}
             {...register("title")}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            label="ประเภทเอกสาร"
+            label={d("type")}
             size="small"
             margin="dense"
             fullWidth
             sx={compactTextFieldSx}
             error={Boolean(errors.documentType)}
-            helperText={errors.documentType?.message}
+            helperText={fieldError(v, errors.documentType)}
             {...register("documentType")}
           />
         </Grid>
         <Grid size={12}>
           <TextField
-            label="URL เอกสาร"
+            label={d("url")}
             size="small"
             margin="dense"
             fullWidth
             sx={compactTextFieldSx}
             error={Boolean(errors.fileUrl)}
-            helperText={errors.fileUrl?.message}
+            helperText={fieldError(v, errors.fileUrl)}
             {...register("fileUrl")}
           />
         </Grid>
@@ -148,15 +153,15 @@ export function DocumentForm() {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="เลือกผู้ประกอบการ (ถ้ามี)"
+                    label={d("merchantOptional")}
                     size="small"
                     margin="dense"
                     fullWidth
                     sx={compactTextFieldSx}
                     error={Boolean(errors.merchantUuid)}
                     helperText={
-                      errors.merchantUuid?.message ??
-                      "เลือกจากชื่อผู้ประกอบการ ระบบจะผูกข้อมูลผู้ประกอบการให้อัตโนมัติ"
+                      fieldError(v, errors.merchantUuid) ??
+                      d("merchantHelper")
                     }
                     slotProps={{
                       input: {
@@ -179,7 +184,7 @@ export function DocumentForm() {
         </Grid>
         <Grid size={12}>
           <TextField
-            label="รายละเอียด (ถ้ามี)"
+            label={d("description")}
             size="small"
             margin="dense"
             fullWidth
@@ -198,7 +203,7 @@ export function DocumentForm() {
         sx={{ mt: 2.5, borderRadius: 1 }}
         disabled={isSubmitting}
       >
-        {isSubmitting ? "กำลังส่งเอกสาร..." : "ส่งเอกสาร"}
+        {isSubmitting ? d("submitting") : d("submit")}
       </Button>
     </Box>
   );

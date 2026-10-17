@@ -3,42 +3,58 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Alert, Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { toast } from "react-toastify";
+import { useTranslations } from "next-intl";
 import { resetPassword } from "@/service/user.service";
+import { LanguageSwitcher } from "../../components/language-switcher";
 import styles from "../login/page.module.scss";
 
 function ResetPasswordForm() {
+  const a = useTranslations("Auth");
   const router = useRouter();
   const token = useSearchParams().get("token") ?? "";
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const mismatch = confirmNewPassword !== "" && newPassword !== confirmNewPassword;
+  const mismatch =
+    confirmNewPassword !== "" && newPassword !== confirmNewPassword;
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setSaving(true);
-    const result = await resetPassword({ token, newPassword, confirmNewPassword });
+    const result = await resetPassword({
+      token,
+      newPassword,
+      confirmNewPassword,
+    });
     setSaving(false);
     if (!result.success) {
       toast.error(result.message);
       return;
     }
-    toast.success("ตั้งรหัสผ่านใหม่สำเร็จ กรุณาเข้าสู่ระบบ");
+    toast.success(a("resetSuccess"));
     router.replace("/login");
   };
 
   if (!token) {
-    return <Alert severity="error">ลิงก์ไม่ถูกต้อง กรุณาขอลิงก์ตั้งรหัสผ่านใหม่อีกครั้ง</Alert>;
+    return <Alert severity="error">{a("badLink")}</Alert>;
   }
 
   return (
     <Box component="form" onSubmit={onSubmit}>
       <Stack spacing={2}>
         <TextField
-          label="รหัสผ่านใหม่ (อย่างน้อย 8 ตัวอักษร)"
+          label={a("newPasswordLabel")}
           type="password"
           autoComplete="new-password"
           value={newPassword}
@@ -48,13 +64,13 @@ function ResetPasswordForm() {
           slotProps={{ htmlInput: { minLength: 8, maxLength: 72 } }}
         />
         <TextField
-          label="ยืนยันรหัสผ่านใหม่"
+          label={a("confirmNewLabel")}
           type="password"
           autoComplete="new-password"
           value={confirmNewPassword}
           onChange={(event) => setConfirmNewPassword(event.target.value)}
           error={mismatch}
-          helperText={mismatch ? "รหัสผ่านไม่ตรงกัน" : undefined}
+          helperText={mismatch ? a("mismatch") : undefined}
           required
           fullWidth
         />
@@ -64,7 +80,7 @@ function ResetPasswordForm() {
           disabled={saving || mismatch || newPassword.length < 8}
           className={styles.submitButton}
         >
-          {saving ? "กำลังบันทึก..." : "บันทึกรหัสผ่านใหม่"}
+          {saving ? a("saving") : a("saveNewPassword")}
         </Button>
       </Stack>
     </Box>
@@ -72,13 +88,19 @@ function ResetPasswordForm() {
 }
 
 export default function ResetPasswordPage() {
+  const a = useTranslations("Auth");
   return (
     <Box component="main" className={styles.page}>
       <Paper elevation={0} className={styles.card} sx={{ maxWidth: 520 }}>
+        <Box
+          sx={{ display: "flex", justifyContent: "flex-end", p: 1.5, pb: 0 }}
+        >
+          <LanguageSwitcher />
+        </Box>
         <Box className={styles.formPanel}>
           <Box className={styles.header}>
             <Typography variant="h5" className={styles.title}>
-              ตั้งรหัสผ่านใหม่
+              {a("resetTitle")}
             </Typography>
           </Box>
           <Suspense>
@@ -86,7 +108,7 @@ export default function ResetPasswordPage() {
           </Suspense>
           <Typography variant="body2" className={styles.panelFooter}>
             <Link href="/login" className={styles.footerLink}>
-              กลับไปเข้าสู่ระบบ
+              {a("backToLogin")}
             </Link>
           </Typography>
         </Box>

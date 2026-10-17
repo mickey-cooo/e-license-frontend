@@ -16,8 +16,17 @@ import {
   type RegisterSchema,
 } from "../../../schema/register.schema";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
+import { signUp } from "@/service/user.service";
+import { fieldError } from "@/lib/helper/field-error";
+import { LanguageSwitcher } from "../../components/language-switcher";
 
 export default function RegisterPage() {
+  const a = useTranslations("Auth");
+  const v = useTranslations("Validation");
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -32,30 +41,41 @@ export default function RegisterPage() {
   });
 
   const onSubmit = async (values: RegisterSchema) => {
-    console.log("register payload:", values);
+    const result = await signUp(values);
+    if (!result.success) {
+      toast.error(result.message);
+      return;
+    }
+    toast.success(a("registerSuccess"));
+    router.replace("/login");
   };
 
   return (
     <Box component="main" className={styles.page}>
       <Paper elevation={0} className={styles.card}>
+        <Box
+          sx={{ display: "flex", justifyContent: "flex-end", p: 1.5, pb: 0 }}
+        >
+          <LanguageSwitcher />
+        </Box>
         <Box className={styles.authLayout}>
           <Box className={styles.showcase}>
             <Typography variant="h4" className={styles.showcaseTitle}>
-              เริ่มต้นใช้งานภายในไม่กี่นาที
+              {a("registerWelcome")}
             </Typography>
             <Typography variant="body1" className={styles.showcaseDescription}>
-              สร้างบัญชีเพื่อส่งคำขอใบอนุญาต ตรวจสอบสถานะ และรับการแจ้งเตือนสำคัญได้ทันที
+              {a("registerLead")}
             </Typography>
 
             <Stack spacing={1.5} className={styles.featureList}>
               <Typography variant="body2" className={styles.featureItem}>
-                สมัครใช้งานง่ายและปลอดภัย
+                {a("registerPoint1")}
               </Typography>
               <Typography variant="body2" className={styles.featureItem}>
-                รองรับการยืนยันตัวตนตามมาตรฐาน
+                {a("registerPoint2")}
               </Typography>
               <Typography variant="body2" className={styles.featureItem}>
-                จัดเก็บประวัติคำขอเป็นระบบ
+                {a("registerPoint3")}
               </Typography>
             </Stack>
           </Box>
@@ -67,14 +87,14 @@ export default function RegisterPage() {
                 className={styles.title}
                 color="text.primary"
               >
-                สมัครสมาชิกเพื่อขอใบอนุญาตประกอบธุรกิจทุกประเภท
+                {a("registerTitle")}
               </Typography>
               <Typography
                 variant="body2"
                 className={styles.description}
                 color="text.secondary"
               >
-                สำหรับเจ้าหน้าที่ภาครัฐและผู้ยื่นคำขอ
+                {a("audience")}
               </Typography>
             </Box>
 
@@ -82,36 +102,36 @@ export default function RegisterPage() {
               <Stack spacing={2}>
                 <TextField
                   id="email"
-                  label="อีเมล"
+                  label={a("email")}
                   type="email"
                   autoComplete="email"
                   placeholder="name@agency.go.th"
                   error={Boolean(errors.email)}
-                  helperText={errors.email?.message}
+                  helperText={fieldError(v, errors.email)}
                   fullWidth
                   {...register("email")}
                 />
 
                 <TextField
                   id="password"
-                  label="รหัสผ่าน"
+                  label={a("password")}
                   type="password"
                   autoComplete="new-password"
-                  placeholder="กรอกรหัสผ่าน"
+                  placeholder={a("passwordPlaceholder")}
                   error={Boolean(errors.password)}
-                  helperText={errors.password?.message}
+                  helperText={fieldError(v, errors.password)}
                   fullWidth
                   {...register("password")}
                 />
 
                 <TextField
                   id="confirmPassword"
-                  label="ยืนยันรหัสผ่าน"
+                  label={a("confirmPassword")}
                   type="password"
                   autoComplete="new-password"
-                  placeholder="กรอกยืนยันรหัสผ่าน"
+                  placeholder={a("confirmPlaceholder")}
                   error={Boolean(errors.confirmPassword)}
-                  helperText={errors.confirmPassword?.message}
+                  helperText={fieldError(v, errors.confirmPassword)}
                   fullWidth
                   {...register("confirmPassword")}
                 />
@@ -122,15 +142,15 @@ export default function RegisterPage() {
                   disabled={isSubmitting}
                   className={styles.submitButton}
                 >
-                  {isSubmitting ? "กำลังสมัครสมาชิก..." : "สมัครสมาชิก"}
+                  {isSubmitting ? a("registering") : a("signUp")}
                 </Button>
               </Stack>
             </Box>
 
             <Typography variant="body2" className={styles.panelFooter}>
-              มีบัญชีอยู่แล้ว?{" "}
+              {a("haveAccount")}{" "}
               <Link href="/login" className={styles.footerLink}>
-                เข้าสู่ระบบ
+                {a("loginButton")}
               </Link>
             </Typography>
           </Box>

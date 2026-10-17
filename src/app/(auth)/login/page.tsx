@@ -18,9 +18,13 @@ import { toast } from "react-toastify";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { fieldError } from "@/lib/helper/field-error";
+import { LanguageSwitcher } from "../../components/language-switcher";
 
 export default function LoginPage() {
   const t = useTranslations("Homepage");
+  const a = useTranslations("Auth");
+  const v = useTranslations("Validation");
   const router = useRouter();
 
   const {
@@ -47,9 +51,11 @@ export default function LoginPage() {
         router.replace(DEFAULT_LOGIN_REDIRECT);
       } else {
         toast.error(
-          t(`error.${result?.error}`, {
-            defaultValue: t("error.somethingWentWrong"),
-          }),
+          t(
+            t.has(`error.${result?.error}`)
+              ? `error.${result?.error}`
+              : "error.somethingWentWrong",
+          )
         );
       }
     } catch {
@@ -60,24 +66,29 @@ export default function LoginPage() {
   return (
     <Box component="main" className={styles.page}>
       <Paper elevation={0} className={styles.card}>
+        <Box
+          sx={{ display: "flex", justifyContent: "flex-end", p: 1.5, pb: 0 }}
+        >
+          <LanguageSwitcher />
+        </Box>
         <Box className={styles.authLayout}>
           <Box className={styles.showcase}>
             <Typography variant="h4" className={styles.showcaseTitle}>
-              ยินดีต้อนรับกลับ
+              {a("welcomeBack")}
             </Typography>
             <Typography variant="body1" className={styles.showcaseDescription}>
-              จัดการคำขอใบอนุญาตได้รวดเร็ว ปลอดภัย และติดตามสถานะได้แบบเรียลไทม์
+              {a("loginLead")}
             </Typography>
 
             <Stack spacing={1.5} className={styles.featureList}>
               <Typography variant="body2" className={styles.featureItem}>
-                ติดตามคำขอได้ทุกขั้นตอน
+                {a("loginPoint1")}
               </Typography>
               <Typography variant="body2" className={styles.featureItem}>
-                ลดเวลาตรวจสอบเอกสาร
+                {a("loginPoint2")}
               </Typography>
               <Typography variant="body2" className={styles.featureItem}>
-                รองรับการใช้งานหลายหน่วยงาน
+                {a("loginPoint3")}
               </Typography>
             </Stack>
           </Box>
@@ -89,14 +100,14 @@ export default function LoginPage() {
                 className={styles.title}
                 color="text.primary"
               >
-                เข้าสู่ระบบขอใบอนุญาตประกอบธุรกิจทุกประเภท
+                {a("loginTitle")}
               </Typography>
               <Typography
                 variant="body2"
                 className={styles.description}
                 color="text.secondary"
               >
-                สำหรับเจ้าหน้าที่ภาครัฐและผู้ยื่นคำขอ
+                {a("audience")}
               </Typography>
             </Box>
 
@@ -104,24 +115,24 @@ export default function LoginPage() {
               <Stack spacing={2}>
                 <TextField
                   id="email"
-                  label="อีเมล"
+                  label={a("email")}
                   type="email"
                   autoComplete="email"
                   placeholder="name@agency.go.th"
                   error={Boolean(errors.email)}
-                  helperText={errors.email?.message}
+                  helperText={fieldError(v, errors.email)}
                   fullWidth
                   {...register("email")}
                 />
 
                 <TextField
                   id="password"
-                  label="รหัสผ่าน"
+                  label={a("password")}
                   type="password"
                   autoComplete="current-password"
-                  placeholder="กรอกรหัสผ่าน"
+                  placeholder={a("passwordPlaceholder")}
                   error={Boolean(errors.password)}
-                  helperText={errors.password?.message}
+                  helperText={fieldError(v, errors.password)}
                   fullWidth
                   {...register("password")}
                 />
@@ -132,19 +143,19 @@ export default function LoginPage() {
                   disabled={isSubmitting}
                   className={styles.submitButton}
                 >
-                  {isSubmitting ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
+                  {isSubmitting ? a("loggingIn") : a("loginButton")}
                 </Button>
               </Stack>
             </Box>
 
             <Typography variant="body2" className={styles.panelFooter}>
               <Link href="/forgot-password" className={styles.footerLink}>
-                ลืมรหัสผ่าน?
+                {a("forgotLink")}
               </Link>
               {" · "}
-              ยังไม่มีบัญชี?{" "}
+              {a("noAccount")}{" "}
               <Link href="/register" className={styles.footerLink}>
-                สมัครสมาชิก
+                {a("signUp")}
               </Link>
             </Typography>
           </Box>

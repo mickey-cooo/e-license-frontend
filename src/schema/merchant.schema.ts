@@ -9,9 +9,7 @@ export const merchantSchema = z.object({
   taxId: z
     .string()
     .regex(/^\d{13}$/, "taxIdInvalid"),
-  merchantType: z.enum(merchantTypeValues, {
-    errorMap: () => ({ message: "merchantTypeRequired" }),
-  }),
+  merchantType: z.enum(merchantTypeValues, "merchantTypeRequired"),
   contactName: z.string().min(1, "contactNameRequired"),
   contactEmail: z.string().email("contactEmailInvalid"),
   contactPhoneNumber: z

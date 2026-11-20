@@ -50,39 +50,43 @@ export function TopNavbar() {
             <span className={styles.brandName}>e-Licensing</span>
             <span className={styles.brandSub}>{t("formTitle")}</span>
           </Link>
-          <LanguageSwitcher />
-        </div>
-        <nav aria-label={t("mainMenu")} className={styles.cells}>
-          {items.map((item) => {
-            const active =
-              item.href === "/home"
-                ? pathname === item.href
-                : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={clsx(styles.cell, active && styles.active)}
+          <div className={styles.actions}>
+            <LanguageSwitcher />
+            {authenticated ? (
+              <button
+                type="button"
+                className={styles.authLogout}
+                onClick={() => void handleLogout()}
               >
-                {t(item.label)}
+                {t("logout")}
+              </button>
+            ) : ready ? (
+              <Link href="/login" className={styles.authLogin}>
+                {t("login")}
               </Link>
-            );
-          })}
-          {authenticated ? (
-            <button
-              type="button"
-              className={styles.cell}
-              onClick={() => void handleLogout()}
-            >
-              {t("logout")}
-            </button>
-          ) : ready ? (
-            <Link href="/login" className={styles.cell}>
-              {t("login")}
-            </Link>
-          ) : null}
-        </nav>
+            ) : null}
+          </div>
+        </div>
+        {items.length > 0 && (
+          <nav aria-label={t("mainMenu")} className={styles.cells}>
+            {items.map((item) => {
+              const active =
+                item.href === "/home"
+                  ? pathname === item.href
+                  : pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={clsx(styles.cell, active && styles.active)}
+                >
+                  {t(item.label)}
+                </Link>
+              );
+            })}
+          </nav>
+        )}
       </div>
     </header>
   );
